@@ -1,0 +1,1196 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Petrol 95 Switzerland</title><style>
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;margin:0;background:#f2f2f2;color:#222}
+header{background:#1769aa;color:white;padding:6px;text-align:center}
+header h1{margin:0;font-size:18px}
+#status{font-size:11px;margin-top:2px}
+
+.controls{
+background:white;padding:5px 7px;position:sticky;top:0;z-index:10;
+box-shadow:0 1px 3px #aaa
+}
+
+.filter-row{
+display:flex;align-items:center;gap:4px;margin-bottom:3px
+}
+
+.filter-row label{
+width:85px;flex-shrink:0;font-size:12px
+}
+
+select,input[type=date],input[type=text]{
+width:170px;max-width:calc(100vw - 95px);
+padding:3px 4px;font-size:13px;height:28px
+}
+
+button{
+padding:5px 8px;margin:2px;border:0;border-radius:4px;
+background:#1769aa;color:white;font-size:12px
+}
+
+button.green{background:#188038}
+button.dark{background:#555}
+button.orange{background:#ef6c00}
+
+.location-info{
+background:#e8f3fb;padding:4px 6px;margin:3px 0;
+border-radius:4px;font-size:11px
+}
+
+.help{font-size:10px;color:#666;margin:0 0 3px 89px}
+
+.route-box{
+display:none;
+background:#f7f7f7;
+border:1px solid #ddd;
+border-radius:5px;
+padding:5px;
+margin:4px 0
+}
+
+.card{
+background:white;margin:6px 8px;padding:8px;
+border-radius:7px;box-shadow:0 1px 3px #bbb
+}
+
+.station{font-size:17px;font-weight:bold}
+.address{color:#666;margin-top:3px;font-size:13px}
+.brand{color:#555;font-size:12px;margin-top:2px}
+.distance{color:#777;font-size:12px;margin-top:3px}
+.price{font-size:21px;font-weight:bold;margin-top:6px}
+.cheapest{color:green}
+.price-label{font-size:11px;color:#777}
+.price-update{font-size:12px;margin-top:6px}
+.recent{color:#2e7d32;font-weight:bold}
+.warning{color:#ef6c00;font-weight:bold}
+.old{color:#c62828;font-weight:bold}
+
+.detour{
+font-size:13px;
+font-weight:bold;
+margin-top:5px
+}
+
+.rank{
+display:inline-block;background:#eee;border-radius:4px;
+padding:2px 5px;font-size:11px;margin-bottom:4px
+}
+
+.station-buttons{margin-top:6px}
+
+.station-buttons a{
+display:inline-block;text-decoration:none;color:white;
+padding:5px 8px;margin:2px 3px 2px 0;
+border-radius:4px;font-size:12px;background:#555
+}
+
+.station-buttons a.navigate{background:#188038}
+
+.route-actions{
+padding:5px 8px;
+text-align:center
+}
+
+.empty{text-align:center;color:#666}
+h2{margin:8px;font-size:17px}
+hr{border:0;border-top:1px solid #ddd;margin:6px 0}
+</style></head><body><header>
+<h1>⛽ Petrol 95</h1>
+<div id="status">Loading...</div>
+</header><div class="controls"><div class="filter-row">
+<label><b>Mode</b></label>
+<select id="mode">
+<option value="near">📍 Near location</option>
+<option value="route">🚗 Along route</option>
+</select>
+</div><div class="filter-row">
+<label><b>Location</b></label>
+<select id="location">
+<option value="current">📍 Current GPS</option>
+<option value="bonfol">Bonfol</option>
+<option value="bonstetten">Bonstetten</option>
+<option value="basel">Basel</option>
+<option value="moutier">Moutier</option>
+<option value="delémont">Delémont</option>
+<option value="search">🔎 Search city</option>
+</select>
+</div><div id="cityRow" class="filter-row" style="display:none">
+<label><b>City</b></label>
+<input id="citySearch" type="text" placeholder="e.g. Delémont">
+<button onclick="searchCity()">Search</button>
+</div><div class="route-box" id="routeBox"><div class="filter-row">
+<label><b>From</b></label>
+<input id="routeFrom" type="text" placeholder="Current / Bonfol">
+</div><div class="filter-row">
+<label><b>To</b></label>
+<input id="routeTo" type="text" placeholder="e.g. Moutier">
+</div><button class="green" onclick="calculateRoute()">
+🚗 Find stations along route
+</button></div><div id="locationInfo" class="location-info">
+📍 Waiting for location...
+</div><div class="filter-row">
+<label><b>Sort</b></label>
+<select id="sort">
+<option value="score">Best for journey</option>
+<option value="distance">Nearest</option>
+<option value="price">Cheapest</option>
+<option value="oldest">Oldest update</option>
+</select>
+</div><div class="filter-row">
+<label><b>Radius</b></label>
+<select id="radius">
+<option value="5">5 km</option>
+<option value="10">10 km</option>
+<option value="25" selected>25 km</option>
+<option value="50">50 km</option>
+<option value="100">100 km</option>
+<option value="9999">All Switzerland</option>
+</select>
+</div><div class="filter-row">
+<label><b>Route corridor</b></label>
+<select id="corridor">
+<option value="2">≤ 2 km from route</option>
+<option value="5" selected>≤ 5 km from route</option>
+<option value="10">≤ 10 km from route</option>
+<option value="20">≤ 20 km from route</option>
+</select>
+</div><div class="filter-row">
+<label><b>Brand</b></label>
+<select id="brand">
+<option value="all">All brands</option>
+</select>
+</div><div class="filter-row">
+<label><b>Updated ≤</b></label>
+<input type="date" id="updateBefore">
+</div><div class="help">
+Only show prices updated on or before this date.
+</div><div class="filter-row">
+<label><b>Price age</b></label>
+<select id="age">
+<option value="all">Any age</option>
+<option value="1">≤ 1 day</option>
+<option value="3">≤ 3 days</option>
+<option value="7">≤ 7 days</option>
+<option value="14">≤ 14 days</option>
+<option value="30">≤ 30 days</option>
+</select>
+</div><div class="help">
+Only show prices updated within the selected number of days.
+</div><button onclick="getCurrentLocation()">📍 GPS</button>
+<button onclick="showStations()">Show</button>
+<button onclick="clearFilters()">Clear</button>
+
+</div><div id="routeActions" class="route-actions" style="display:none">
+<button class="green" onclick="openGoogleTop10()">
+🗺️ Google Maps — Top 10
+</button>
+</div><div id="results"></div><script>
+
+let stations=[];
+let currentPosition=null;
+let routeGeometry=[];
+let routeStart=null;
+let routeEnd=null;
+let routeResults=[];
+
+const locations={
+
+bonfol:{lat:47.477,lng:7.151,name:"Bonfol"},
+bonstetten:{lat:47.315,lng:8.467,name:"Bonstetten"},
+basel:{lat:47.559,lng:7.589,name:"Basel"},
+moutier:{lat:47.278,lng:7.370,name:"Moutier"},
+"delémont":{lat:47.3654,lng:7.3450,name:"Delémont"}
+
+};
+
+
+/* LOAD */
+
+function loadData(){
+
+fetch("petrol95.json?v="+Date.now())
+
+.then(r=>{
+if(!r.ok)throw new Error("HTTP "+r.status);
+return r.json();
+})
+
+.then(data=>{
+
+stations=data.stations||[];
+
+populateBrands();
+
+document.getElementById("status").innerHTML=
+stations.length+
+" stations • Retrieved: "+
+formatDate(data.updated);
+
+setLocationFromSelection();
+
+})
+
+.catch(e=>{
+
+document.getElementById("status").innerText=
+"ERROR loading petrol95.json";
+
+document.getElementById("results").innerHTML=
+"<div class='card empty'>"+
+escapeHTML(e.message)+
+"</div>";
+
+});
+
+}
+
+
+/* BRANDS */
+
+function populateBrands(){
+
+const select=document.getElementById("brand");
+const brands=[];
+
+stations.forEach(s=>{
+
+if(s.brand&&!brands.includes(s.brand))
+brands.push(s.brand);
+
+});
+
+brands.sort((a,b)=>
+String(a).localeCompare(String(b))
+);
+
+brands.forEach(b=>{
+
+const o=document.createElement("option");
+o.value=b;
+o.textContent=b;
+select.appendChild(o);
+
+});
+
+}
+
+
+/* LOCATION */
+
+function setLocationFromSelection(){
+
+const value=
+document.getElementById("location").value;
+
+const cityRow=
+document.getElementById("cityRow");
+
+if(value==="search"){
+
+cityRow.style.display="flex";
+return;
+
+}
+
+cityRow.style.display="none";
+
+if(value==="current"){
+
+if(currentPosition){
+showCurrentLocation();
+}else{
+document.getElementById("locationInfo").innerHTML=
+"📍 Tap GPS to use your current location.";
+showStations();
+}
+
+return;
+
+}
+
+const loc=locations[value];
+
+if(!loc)return;
+
+currentPosition={
+lat:loc.lat,
+lng:loc.lng
+};
+
+document.getElementById("locationInfo").innerHTML=
+"📍 Using <b>"+loc.name+"</b>";
+
+showStations();
+
+}
+
+
+/* CITY SEARCH */
+
+function searchCity(){
+
+const city=
+document.getElementById("citySearch").value.trim();
+
+if(!city)return;
+
+document.getElementById("locationInfo").innerHTML=
+"🔎 Searching for "+escapeHTML(city)+"...";
+
+fetch(
+"https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=ch&limit=1&q="+
+encodeURIComponent(city),
+{
+headers:{
+"Accept":"application/json"
+}
+}
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.length){
+
+document.getElementById("locationInfo").innerHTML=
+"❌ Swiss city not found.";
+return;
+
+}
+
+currentPosition={
+lat:Number(data[0].lat),
+lng:Number(data[0].lon)
+};
+
+document.getElementById("locationInfo").innerHTML=
+"📍 <b>"+
+escapeHTML(city)+
+"</b>";
+
+showStations();
+
+})
+
+.catch(e=>{
+
+document.getElementById("locationInfo").innerHTML=
+"❌ City search failed.";
+
+});
+
+}
+
+
+/* GPS */
+
+function getCurrentLocation(){
+
+if(!navigator.geolocation){
+
+alert("GPS not supported");
+return;
+}
+
+document.getElementById("locationInfo").innerHTML=
+"📍 Getting GPS...";
+
+navigator.geolocation.getCurrentPosition(
+
+p=>{
+
+currentPosition={
+lat:p.coords.latitude,
+lng:p.coords.longitude
+};
+
+document.getElementById("location").value="current";
+
+document.getElementById("locationInfo").innerHTML=
+"📍 <b>Current location</b><br>"+
+currentPosition.lat.toFixed(5)+
+", "+
+currentPosition.lng.toFixed(5);
+
+showStations();
+
+},
+
+e=>{
+
+document.getElementById("locationInfo").innerHTML=
+"❌ GPS error: "+escapeHTML(e.message);
+
+},
+
+{
+enableHighAccuracy:true,
+timeout:20000,
+maximumAge:60000
+}
+
+);
+
+}
+
+
+/* ROUTE */
+
+function calculateRoute(){
+
+const from=
+document.getElementById("routeFrom").value.trim();
+
+const to=
+document.getElementById("routeTo").value.trim();
+
+if(!from||!to){
+
+alert("Enter From and To.");
+return;
+
+}
+
+document.getElementById("locationInfo").innerHTML=
+"🚗 Finding route...";
+
+Promise.all([
+geocode(from),
+geocode(to)
+])
+
+.then(points=>{
+
+routeStart=points[0];
+routeEnd=points[1];
+
+const url=
+"https://router.project-osrm.org/route/v1/driving/"+
+routeStart.lng+","+routeStart.lat+";"+
+routeEnd.lng+","+routeEnd.lat+
+"?overview=full&geometries=geojson";
+
+return fetch(url);
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.routes||!data.routes.length)
+throw new Error("Route not found");
+
+routeGeometry=
+data.routes[0].geometry.coordinates.map(
+p=>({lng:p[0],lat:p[1]})
+);
+
+currentPosition=routeStart;
+
+document.getElementById("locationInfo").innerHTML=
+"🚗 <b>"+
+escapeHTML(from)+
+" → "+
+escapeHTML(to)+
+"</b><br>"+
+(data.routes[0].distance/1000).toFixed(1)+
+" km route";
+
+document.getElementById("routeActions").style.display="block";
+
+showStations();
+
+})
+
+.catch(e=>{
+
+document.getElementById("locationInfo").innerHTML=
+"❌ Route error: "+escapeHTML(e.message);
+
+});
+
+}
+
+
+/* GEOCODE */
+
+function geocode(text){
+
+const preset=
+Object.keys(locations).find(
+k=>locations[k].name.toLowerCase()===text.toLowerCase()
+);
+
+if(preset){
+
+return Promise.resolve({
+lat:locations[preset].lat,
+lng:locations[preset].lng
+});
+
+}
+
+return fetch(
+"https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=ch&limit=1&q="+
+encodeURIComponent(text),
+{
+headers:{
+"Accept":"application/json"
+}
+}
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.length)
+throw new Error("Location not found: "+text);
+
+return{
+lat:Number(data[0].lat),
+lng:Number(data[0].lon)
+};
+
+});
+
+}
+
+
+/* DISTANCE */
+
+function distance(a,b,c,d){
+
+const R=6371;
+
+const p1=a*Math.PI/180;
+const p2=c*Math.PI/180;
+
+const dp=(c-a)*Math.PI/180;
+const dl=(d-b)*Math.PI/180;
+
+const x=
+Math.sin(dp/2)**2+
+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+
+return R*2*Math.atan2(
+Math.sqrt(x),
+Math.sqrt(1-x)
+);
+
+}
+
+
+/* DISTANCE TO ROUTE */
+
+function distanceToRoute(lat,lng){
+
+if(!routeGeometry.length)
+return Infinity;
+
+let best=Infinity;
+
+for(const p of routeGeometry){
+
+const d=
+distance(lat,lng,p.lat,p.lng);
+
+if(d<best)
+best=d;
+
+}
+
+return best;
+
+}
+
+
+/* PRICE UPDATE */
+
+function getPriceUpdate(s){
+
+if(
+s.fuel95Raw &&
+s.fuel95Raw.fiability &&
+s.fuel95Raw.fiability.lastPriceUpdate
+)
+return s.fuel95Raw.fiability.lastPriceUpdate;
+
+return null;
+
+}
+
+
+function getAgeDays(t){
+
+if(!t)return null;
+
+return Math.max(
+0,
+(Date.now()-new Date(t).getTime())/86400000
+);
+
+}
+
+
+function formatDate(v){
+
+if(!v)return"unknown";
+
+return new Date(v).toLocaleString(
+"de-CH",
+{
+dateStyle:"short",
+timeStyle:"short"
+}
+);
+
+}
+
+
+/* GOOGLE LINKS */
+
+function mapsLink(s){
+
+return(
+"https://www.google.com/maps/search/?api=1&query="+
+encodeURIComponent(s.lat+","+s.lng)
+);
+
+}
+
+
+function navigateLink(s){
+
+return(
+"https://www.google.com/maps/dir/?api=1"+
+"&destination="+
+encodeURIComponent(s.lat+","+s.lng)+
+"&travelmode=driving"
+);
+
+}
+
+
+/* GOOGLE TOP 10 */
+
+function openGoogleTop10(){
+
+if(!routeResults.length)return;
+
+const top=
+routeResults.slice(0,10);
+
+let origin;
+
+if(currentPosition){
+
+origin=
+currentPosition.lat+","+currentPosition.lng;
+
+}
+
+const destination=
+top[top.length-1].station.lat+
+","+
+top[top.length-1].station.lng;
+
+const waypoints=
+top.slice(0,-1)
+.map(x=>
+x.station.lat+","+x.station.lng
+)
+.join("|");
+
+let url=
+"https://www.google.com/maps/dir/?api=1";
+
+if(origin)
+url+="&origin="+encodeURIComponent(origin);
+
+url+="&destination="+
+encodeURIComponent(destination);
+
+if(waypoints)
+url+="&waypoints="+
+encodeURIComponent(waypoints);
+
+url+="&travelmode=driving";
+
+window.open(url,"_blank");
+
+}
+
+
+/* SHOW */
+
+function showStations(){
+
+if(!currentPosition){
+
+document.getElementById("results").innerHTML=
+"<div class='card empty'>Select a location or GPS.</div>";
+
+return;
+
+}
+
+const mode=
+document.getElementById("mode").value;
+
+const radius=
+Number(document.getElementById("radius").value);
+
+const corridor=
+Number(document.getElementById("corridor").value);
+
+const sort=
+document.getElementById("sort").value;
+
+const brand=
+document.getElementById("brand").value;
+
+const before=
+document.getElementById("updateBefore").value;
+
+const maxAge=
+document.getElementById("age").value;
+
+let beforeTime=null;
+
+if(before)
+beforeTime=
+new Date(before+"T23:59:59").getTime();
+
+let rows=[];
+
+stations.forEach(s=>{
+
+if(
+brand!=="all" &&
+s.brand!==brand
+)return;
+
+const lat=Number(s.lat);
+const lng=Number(s.lng);
+const price=Number(s.price95);
+
+if(
+!Number.isFinite(lat)||
+!Number.isFinite(lng)||
+!Number.isFinite(price)
+)return;
+
+const dist=
+distance(
+currentPosition.lat,
+currentPosition.lng,
+lat,
+lng
+);
+
+let routeDist=null;
+
+if(mode==="near"){
+
+if(dist>radius)return;
+
+}else{
+
+if(!routeGeometry.length)return;
+
+routeDist=
+distanceToRoute(lat,lng);
+
+if(routeDist>corridor)return;
+
+}
+
+const update=getPriceUpdate(s);
+
+const updateTime=
+update?
+new Date(update).getTime():
+null;
+
+if(
+beforeTime!==null &&
+(
+updateTime===null||
+updateTime>beforeTime
+)
+)
+return;
+
+const age=getAgeDays(update);
+
+if(
+maxAge!=="all" &&
+(
+age===null||
+age>Number(maxAge)
+)
+)
+return;
+
+
+/*
+Journey score:
+
+Cheap petrol helps.
+Small route detour helps.
+
+Price component is normalised later.
+*/
+
+rows.push({
+station:s,
+distance:dist,
+routeDistance:routeDist,
+price,
+update,
+updateTime,
+age
+});
+
+});
+
+
+/* SCORE */
+
+if(mode==="route"&&rows.length){
+
+const prices=rows.map(x=>x.price);
+const minPrice=Math.min(...prices);
+const maxPrice=Math.max(...prices);
+
+rows.forEach(x=>{
+
+const priceRange=
+maxPrice-minPrice||0.001;
+
+const priceScore=
+(x.price-minPrice)/priceRange;
+
+const detourScore=
+Math.min(x.routeDistance,20)/20;
+
+/*
+Price 60%
+Detour 40%
+*/
+
+x.score=
+priceScore*0.60+
+detourScore*0.40;
+
+});
+
+}
+
+
+/* SORT */
+
+if(mode==="route"){
+
+if(sort==="price"){
+
+rows.sort((a,b)=>
+a.price-b.price
+);
+
+}else if(sort==="distance"){
+
+rows.sort((a,b)=>
+a.routeDistance-b.routeDistance
+);
+
+}else{
+
+rows.sort((a,b)=>
+a.score-b.score
+);
+
+}
+
+routeResults=rows;
+
+document.getElementById("routeActions").style.display=
+rows.length?"block":"none";
+
+}else{
+
+if(sort==="price"){
+
+rows.sort((a,b)=>
+a.price-b.price||
+a.distance-b.distance
+);
+
+}else if(sort==="oldest"){
+
+rows.sort((a,b)=>
+(a.updateTime||Infinity)-
+(b.updateTime||Infinity)
+);
+
+}else{
+
+rows.sort((a,b)=>
+a.distance-b.distance
+);
+
+}
+
+routeResults=rows;
+
+document.getElementById("routeActions").style.display="none";
+
+}
+
+
+/* OUTPUT */
+
+let html=
+"<h2>"+
+rows.length+
+(mode==="route"?
+" stations along route":
+" stations")+
+"</h2>";
+
+if(mode==="route"&&rows.length){
+
+html+=
+"<div class='card'>"+
+"⭐ <b>Best for journey</b> = price + route detour."+
+"<br>Google Maps button uses the first 10 results."+
+"</div>";
+
+}
+
+if(!rows.length){
+
+html+=
+"<div class='card empty'>"+
+"No stations match the selected filters."+
+"</div>";
+
+}
+
+const cheapest=
+rows.length?
+Math.min(...rows.map(x=>x.price)):
+null;
+
+
+rows.forEach((x,i)=>{
+
+const s=x.station;
+
+let ageText="Unknown";
+let ageClass="warning";
+
+if(x.update){
+
+if(x.age<1){
+
+ageText="Updated today";
+ageClass="recent";
+
+}else{
+
+const d=Math.floor(x.age);
+
+ageText=
+d+
+(d===1?" day old":" days old");
+
+ageClass=
+d>=7?"old":"warning";
+
+}
+
+}
+
+html+=
+"<div class='card'>"+
+
+"<div class='rank'>#"+(i+1)+"</div>"+
+
+"<div class='station'>"+
+escapeHTML(s.name||"Unknown")+
+"</div>"+
+
+"<div class='brand'>"+
+escapeHTML(s.brand||"")+
+"</div>"+
+
+"<div class='address'>"+
+escapeHTML(s.address||"")+
+"</div>"+
+
+"<div class='distance'>"+
+x.distance.toFixed(1)+
+" km from start"+
+"</div>";
+
+if(mode==="route"){
+
+html+=
+"<div class='detour'>"+
+"↪ Route distance: "+
+x.routeDistance.toFixed(1)+
+" km"+
+"</div>";
+
+}
+
+html+=
+
+"<div class='price"+
+(x.price===cheapest?" cheapest":"")+
+"'>"+
+x.price.toFixed(3)+
+" CHF/L"+
+"</div>"+
+
+"<div class='price-label'>"+
+"Bleifrei 95"+
+(x.price===cheapest?
+" • CHEAPEST":
+"")+
+"</div>"+
+
+"<hr>"+
+
+"<div class='price-update'>"+
+"<b>Price updated:</b> "+
+(x.update?
+formatDate(x.update):
+"Unknown")+
+"<br>"+
+"<span class='"+ageClass+"'>"+
+ageText+
+"</span>"+
+"</div>"+
+
+"<div class='station-buttons'>"+
+
+"<a target='_blank' href='"+
+mapsLink(s)+
+"'>🗺️ Map</a>"+
+
+"<a class='navigate' target='_blank' href='"+
+navigateLink(s)+
+"'>🚗 Navigate</a>"+
+
+"</div>"+
+
+"</div>";
+
+});
+
+document.getElementById("results").innerHTML=html;
+
+}
+
+
+/* CLEAR */
+
+function clearFilters(){
+
+document.getElementById("updateBefore").value="";
+document.getElementById("age").value="all";
+document.getElementById("brand").value="all";
+document.getElementById("radius").value="25";
+document.getElementById("corridor").value="5";
+document.getElementById("sort").value="score";
+
+routeGeometry=[];
+routeResults=[];
+
+document.getElementById("routeActions").style.display="none";
+
+showStations();
+
+}
+
+
+/* ESCAPE */
+
+function escapeHTML(v){
+
+return String(v)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* EVENTS */
+
+document.getElementById("mode").onchange=function(){
+
+const route=
+this.value==="route";
+
+document.getElementById("routeBox").style.display=
+route?"block":"none";
+
+if(route){
+
+document.getElementById("sort").value="score";
+
+document.getElementById("routeFrom").value=
+document.getElementById("location").value==="current"?
+"Current location":
+(
+locations[
+document.getElementById("location").value
+]?.name||""
+);
+
+}
+
+showStations();
+
+};
+
+document.getElementById("location").onchange=
+setLocationFromSelection;
+
+document.getElementById("sort").onchange=
+showStations;
+
+document.getElementById("radius").onchange=
+showStations;
+
+document.getElementById("corridor").onchange=
+showStations;
+
+document.getElementById("brand").onchange=
+showStations;
+
+document.getElementById("updateBefore").onchange=
+showStations;
+
+document.getElementById("age").onchange=
+showStations;
+
+
+/* START */
+
+loadData();
+
+</script></body>
+</html>
