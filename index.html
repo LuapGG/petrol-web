@@ -2,12 +2,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Petrol 95 Switzerland</title><style>
+<title>Petrol 95 Switzerland</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
 *{box-sizing:border-box}
 body{font-family:Arial,sans-serif;margin:0;background:#f2f2f2;color:#222}
-header{background:#1769aa;color:white;padding:6px;text-align:center}
+header{background:#1769aa;color:white;padding:6px 7px;text-align:center;position:relative}
 header h1{margin:0;font-size:18px}
 #status{font-size:11px;margin-top:2px}
+.header-title-row{display:flex;align-items:center;justify-content:flex-start;gap:8px;padding-left:89px}
+.review-link{position:static;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.55);margin:0}
 
 .controls{
 background:white;padding:5px 7px;position:sticky;top:0;z-index:10;
@@ -35,6 +40,12 @@ background:#1769aa;color:white;font-size:12px
 button.green{background:#188038}
 button.dark{background:#555}
 button.orange{background:#ef6c00}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+button.help-button{
+width:22px;height:22px;padding:0;margin-left:2px;border-radius:50%;
+background:#5f6f7a;font-size:13px;font-weight:bold;flex-shrink:0
+}
 
 .location-info{
 background:#e8f3fb;padding:4px 6px;margin:3px 0;
@@ -95,21 +106,104 @@ padding:5px 8px;
 text-align:center
 }
 
+.map-overlay{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);
+z-index:1000;padding:10px
+}
+
+.map-panel{
+background:white;height:100%;max-width:900px;margin:auto;border-radius:8px;
+display:flex;flex-direction:column;overflow:hidden
+}
+
+.map-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:6px 8px;font-size:15px;font-weight:bold
+}
+
+#resultsMap{flex:1;min-height:300px}
+
+.price-map-icon{background:transparent;border:0}
+
+.price-map-label{
+background:#1769aa;color:white;border:2px solid white;border-radius:7px;
+box-shadow:0 1px 4px #333;padding:3px 6px;text-align:center;
+font-size:14px;font-weight:bold;line-height:15px;white-space:nowrap
+}
+
+.price-map-label.cheapest{background:#188038;color:white}
+.price-map-label span{display:block;font-size:9px;font-weight:normal}
+.map-popup-price{font-size:17px;font-weight:bold;color:#188038}
+
+.help-overlay{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+z-index:1100;padding:14px;align-items:center;justify-content:center
+}
+
+.help-panel{
+background:white;width:100%;max-width:430px;border-radius:8px;
+box-shadow:0 3px 14px #333;overflow:hidden
+}
+
+.help-header{
+display:flex;align-items:center;justify-content:space-between;
+padding:7px 9px;background:#1769aa;color:white;font-weight:bold
+}
+
+.help-header button{background:white;color:#1769aa}
+.help-text{padding:14px;font-size:14px;line-height:1.45}
+
+.review-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1200;padding:12px;align-items:center;justify-content:center}
+.review-panel{background:#f5f5f5;width:100%;max-width:560px;max-height:94vh;border-radius:9px;box-shadow:0 3px 14px #333;overflow:hidden;display:flex;flex-direction:column}
+.review-body{padding:10px;overflow:auto}
+.review-summary{text-align:center;background:white;border-radius:7px;padding:9px;margin-bottom:9px}
+.review-average{font-size:22px;font-weight:bold;color:#ef6c00}
+.review-form,.review-item{background:white;border-radius:7px;padding:10px;margin-bottom:9px;box-shadow:0 1px 2px #ccc}
+.review-form label{display:block;font-size:12px;font-weight:bold;margin:7px 0 3px}
+.review-form input,.review-form textarea{width:100%;max-width:none;padding:7px;border:1px solid #bbb;border-radius:4px;font:inherit}
+.review-form textarea{height:85px;resize:vertical}
+.review-stars{font-size:29px;line-height:1;letter-spacing:2px;color:#bbb;cursor:pointer;user-select:none}
+.review-stars span.selected{color:#f5a000}
+.review-message{font-size:13px;margin:7px 0;min-height:16px}
+.review-message.success{color:#188038;font-weight:bold}.review-message.error{color:#c62828;font-weight:bold}
+.review-item-head{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#666}
+.review-item-stars{color:#f5a000;font-size:17px}.review-comment{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:5px;line-height:1.35}
+.review-empty{text-align:center;color:#666;padding:14px}.review-honeypot{position:absolute!important;left:-10000px!important}
+
 .empty{text-align:center;color:#666}
+.welcome-card{text-align:center;padding:14px 12px}
+.welcome-card h2{font-size:21px;color:#1769aa;margin:2px 0 8px}
+.welcome-card .marketing-saving{color:#188038;font-weight:bold}
+.welcome-card .marketing-copy{font-size:15px;line-height:1.4;margin:8px 0}
+.marketing-stats{background:#f2f7fa;border-radius:7px;padding:8px;margin:10px 0;font-size:14px;line-height:1.7}
+.marketing-cta{font-weight:bold;color:#1769aa;margin-top:9px}
 h2{margin:8px;font-size:17px}
 hr{border:0;border-top:1px solid #ddd;margin:6px 0}
 </style></head><body><header>
+<div class="header-title-row">
+<button id="reviewsButton" class="review-link" type="button" onclick="openReviews()">⭐ Avis</button>
 <h1>⛽ Petrol 95</h1>
+</div>
 <div id="status">Loading...</div>
 </header><div class="controls"><div class="filter-row">
+<label><b id="languageLabel">Language</b></label>
+<select id="language">
+<option value="fr" selected>Français</option>
+<option value="de">Deutsch</option>
+<option value="en">English</option>
+</select>
+<button type="button" class="help-button" aria-label="Explain Language" onclick="showControlHelp('language')">?</button>
+</div><div class="filter-row">
 <label><b>Mode</b></label>
 <select id="mode">
 <option value="near">📍 Near location</option>
 <option value="route">🚗 Along route</option>
 </select>
-</div><div class="filter-row">
+<button type="button" class="help-button" aria-label="Explain Mode" onclick="showControlHelp('mode')">?</button>
+</div><div id="locationRow" class="filter-row">
 <label><b>Location</b></label>
 <select id="location">
+<option value="" selected disabled>Choose a location…</option>
 <option value="current">📍 Current GPS</option>
 <option value="bonfol">Bonfol</option>
 <option value="bonstetten">Bonstetten</option>
@@ -118,29 +212,57 @@ hr{border:0;border-top:1px solid #ddd;margin:6px 0}
 <option value="delémont">Delémont</option>
 <option value="search">🔎 Search city</option>
 </select>
+<button type="button" class="help-button" aria-label="Explain Location" onclick="showControlHelp('location')">?</button>
 </div><div id="cityRow" class="filter-row" style="display:none">
 <label><b>City</b></label>
 <input id="citySearch" type="text" placeholder="e.g. Delémont">
-<button onclick="searchCity()">Search</button>
+<button id="citySearchButton" onclick="searchCity()">Search</button>
 </div><div class="route-box" id="routeBox"><div class="filter-row">
 <label><b>From</b></label>
-<input id="routeFrom" type="text" placeholder="Current / Bonfol">
+<select id="routeFrom">
+<option value="" selected disabled>Choose a starting point…</option>
+<option value="current">📍 Current GPS</option>
+<option value="bonfol">Bonfol</option>
+<option value="bonstetten">Bonstetten</option>
+<option value="basel">Basel</option>
+<option value="moutier">Moutier</option>
+<option value="delémont">Delémont</option>
+<option value="search">🔎 Search city</option>
+</select>
+<button type="button" class="help-button" aria-label="Explain route start" onclick="showControlHelp('routeFrom')">?</button>
+</div><div id="routeFromCityRow" class="filter-row" style="display:none">
+<label><b>From city</b></label>
+<input id="routeFromCity" type="text" placeholder="e.g. Delémont">
 </div><div class="filter-row">
 <label><b>To</b></label>
-<input id="routeTo" type="text" placeholder="e.g. Moutier">
-</div><button class="green" onclick="calculateRoute()">
-🚗 Find stations along route
-</button></div><div id="locationInfo" class="location-info">
+<select id="routeTo">
+<option value="" selected disabled>Choose a destination…</option>
+<option value="current">📍 Current GPS</option>
+<option value="bonfol">Bonfol</option>
+<option value="bonstetten">Bonstetten</option>
+<option value="basel">Basel</option>
+<option value="moutier">Moutier</option>
+<option value="delémont">Delémont</option>
+<option value="search">🔎 Search city</option>
+</select>
+<button type="button" class="help-button" aria-label="Explain route destination" onclick="showControlHelp('routeTo')">?</button>
+</div><div id="routeToCityRow" class="filter-row" style="display:none">
+<label><b>To city</b></label>
+<input id="routeToCity" type="text" placeholder="e.g. Moutier">
+</div><button id="calculateRouteButton" class="green" onclick="calculateRoute()">
+🚗 Calculate route and show stations
+</button><button type="button" class="help-button" aria-label="Explain route calculation" onclick="showControlHelp('calculateRoute')">?</button>
+</div><div id="locationInfo" class="location-info">
 📍 Waiting for location...
-</div><div class="filter-row">
+</div><div id="sortRow" class="filter-row">
 <label><b>Sort</b></label>
 <select id="sort">
-<option value="score">Best for journey</option>
-<option value="distance">Nearest</option>
-<option value="price">Cheapest</option>
-<option value="oldest">Oldest update</option>
+<option id="bestJourneyOption" value="score">Best for journey</option>
+<option value="distance">Nearest Station</option>
+<option value="price">Cheapest Price</option>
 </select>
-</div><div class="filter-row">
+<button type="button" class="help-button" aria-label="Explain Sort" onclick="showControlHelp('sort')">?</button>
+</div><div id="radiusRow" class="filter-row">
 <label><b>Radius</b></label>
 <select id="radius">
 <option value="5">5 km</option>
@@ -150,7 +272,8 @@ hr{border:0;border-top:1px solid #ddd;margin:6px 0}
 <option value="100">100 km</option>
 <option value="9999">All Switzerland</option>
 </select>
-</div><div class="filter-row">
+<button type="button" class="help-button" aria-label="Explain Radius" onclick="showControlHelp('radius')">?</button>
+</div><div id="corridorRow" class="filter-row">
 <label><b>Route corridor</b></label>
 <select id="corridor">
 <option value="2">≤ 2 km from route</option>
@@ -158,44 +281,256 @@ hr{border:0;border-top:1px solid #ddd;margin:6px 0}
 <option value="10">≤ 10 km from route</option>
 <option value="20">≤ 20 km from route</option>
 </select>
-</div><div class="filter-row">
+<button type="button" class="help-button" aria-label="Explain Route corridor" onclick="showControlHelp('corridor')">?</button>
+</div><div id="brandRow" class="filter-row">
 <label><b>Brand</b></label>
 <select id="brand">
 <option value="all">All brands</option>
 </select>
-</div><div class="filter-row">
-<label><b>Updated ≤</b></label>
-<input type="date" id="updateBefore">
-</div><div class="help">
-Only show prices updated on or before this date.
-</div><div class="filter-row">
+<button type="button" class="help-button" aria-label="Explain Brand" onclick="showControlHelp('brand')">?</button>
+</div><div id="ageRow" class="filter-row">
 <label><b>Price age</b></label>
 <select id="age">
 <option value="all">Any age</option>
 <option value="1">≤ 1 day</option>
-<option value="3">≤ 3 days</option>
+<option value="3" selected>≤ 3 days</option>
 <option value="7">≤ 7 days</option>
 <option value="14">≤ 14 days</option>
 <option value="30">≤ 30 days</option>
 </select>
-</div><div class="help">
-Only show prices updated within the selected number of days.
-</div><button onclick="getCurrentLocation()">📍 GPS</button>
-<button onclick="showStations()">Show</button>
-<button onclick="clearFilters()">Clear</button>
+<button type="button" class="help-button" aria-label="Explain Price age" onclick="showControlHelp('age')">?</button>
+</div><div id="filterActions">
+<button type="button" id="resetButton" onclick="clearFilters()">Reset filters</button>
+<button type="button" id="resetHelpButton" class="help-button" aria-label="Explain Reset filters" onclick="showControlHelp('resetFilters')">?</button>
+<button type="button" id="savingsButton" class="green" onclick="toggleSavings()" disabled>💰 Show potential saving</button>
+<button type="button" class="help-button" aria-label="Explain potential saving" onclick="showControlHelp('savings')">?</button>
+<button type="button" id="mapButton" class="green" onclick="openResultsMap()" disabled>🗺️ Map first 10 results</button>
+<button type="button" class="help-button" aria-label="Explain results map" onclick="showControlHelp('resultsMap')">?</button>
+</div>
 
-</div><div id="routeActions" class="route-actions" style="display:none">
-<button class="green" onclick="openGoogleTop10()">
-🗺️ Google Maps — Top 10
-</button>
-</div><div id="results"></div><script>
+</div><div id="routeActions" class="route-actions" style="display:none"></div>
+<div id="mapOverlay" class="map-overlay" role="dialog" aria-modal="true" aria-label="Map of first 10 results">
+<div class="map-panel">
+<div class="map-header"><span id="mapTitle">🗺️ First 10 filtered results</span><button id="mapCloseButton" type="button" onclick="closeResultsMap()">Close</button></div>
+<div id="resultsMap"></div>
+</div>
+</div>
+<div id="helpOverlay" class="help-overlay" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+<div class="help-panel">
+<div class="help-header"><span id="helpTitle">Help</span><button id="helpCloseButton" type="button" onclick="closeControlHelp()">Close</button></div>
+<div id="helpText" class="help-text"></div>
+</div>
+</div>
+<div id="reviewOverlay" class="review-overlay" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+<div class="review-panel">
+<div class="help-header"><span id="reviewTitle">Avis</span><button id="reviewCloseButton" type="button" onclick="closeReviews()">Fermer</button></div>
+<div class="review-body">
+<div id="reviewSummary" class="review-summary"></div>
+<form id="reviewForm" class="review-form">
+<b id="reviewFormTitle">Donnez votre avis</b>
+<label id="ratingLabel">Note</label>
+<div id="reviewStars" class="review-stars" role="radiogroup" aria-label="Rating"></div>
+<input id="reviewRating" type="hidden" value="0">
+<label id="reviewNameLabel" for="reviewName">Nom (facultatif)</label>
+<input id="reviewName" type="text" maxlength="60" autocomplete="name">
+<label id="reviewCommentLabel" for="reviewComment">Commentaire</label>
+<textarea id="reviewComment" minlength="3" maxlength="1000" required></textarea>
+<label class="review-honeypot" for="reviewWebsite">Website</label><input class="review-honeypot" id="reviewWebsite" type="text" tabindex="-1" autocomplete="off">
+<div id="reviewMessage" class="review-message"></div>
+<button id="reviewSubmit" class="green" type="submit">Envoyer mon avis</button>
+</form>
+<div id="reviewList"></div>
+</div></div></div>
+<div id="results"></div><script>
 
 let stations=[];
 let currentPosition=null;
+let gpsPosition=null;
 let routeGeometry=[];
 let routeStart=null;
 let routeEnd=null;
 let routeResults=[];
+let showSavings=false;
+let displayedRows=[];
+let resultsMap=null;
+let resultsMapLayer=null;
+let resultsRouteLayer=null;
+const SUPABASE_URL="https://ffbvhrwjxodyonpswvlb.supabase.co";
+const SUPABASE_KEY="sb_publishable_wATaGq8xJtEQKy9hTWCN6A_OGglqhYE";
+let selectedReviewRating=0;
+let approvedReviews=[];
+
+let currentLanguage=
+localStorage.getItem("petrolLanguage")||"fr";
+
+const translations={
+fr:{
+loading:"Chargement...",language:"Langue",mode:"Mode",near:"Près d'un lieu",route:"Le long d'un itinéraire",location:"Lieu",chooseLocation:"Choisissez un lieu…",chooseFrom:"Choisissez un départ…",chooseTo:"Choisissez une destination…",currentGps:"Position GPS actuelle",searchCity:"Rechercher une ville",city:"Ville",search:"Rechercher",from:"Départ",fromCity:"Ville de départ",to:"Destination",toCity:"Ville de destination",calculate:"🚗 Calculer l'itinéraire et afficher les stations",waiting:"📍 En attente d'une position...",sort:"Trier",bestJourney:"Meilleur pour le trajet",nearest:"Station la plus proche",cheapest:"Prix le moins cher",radius:"Rayon",allSwitzerland:"Toute la Suisse",corridor:"Couloir de l'itinéraire",fromRoute:"de l'itinéraire",brand:"Marque",allBrands:"Toutes les marques",age:"Âge du prix",anyAge:"Tous",day:"jour",days:"jours",resetFilters:"Réinitialiser les filtres",resetRoute:"Réinitialiser l'itinéraire",showSavings:"💰 Afficher l'économie potentielle",hideSavings:"💰 Masquer l'économie potentielle",mapFirst:"🗺️ Carte des 10 premiers résultats",googleTop:"🗺️ Google Maps — Top 10",mapTitle:"🗺️ 10 premiers résultats filtrés",close:"Fermer",routePrompt:"Choisissez le départ et la destination, puis calculez l'itinéraire.",noMatch:"Aucune station ne correspond aux filtres.",stations:"stations",stationsRoute:"stations le long de l'itinéraire",filteredRange:"Plage de prix filtrée",mostExpensive:"Le plus cher",difference:"Différence",saving50:"Économie potentielle sur 50 L",priceUpdated:"Prix mis à jour",updatedToday:"Mis à jour aujourd'hui",unknown:"Inconnu",oldDays:"jours",fromStart:"km depuis le départ",routeDistance:"Distance de l'itinéraire",map:"Carte",navigate:"Naviguer",help:"Aide"
+},
+de:{
+loading:"Wird geladen...",language:"Sprache",mode:"Modus",near:"In der Nähe",route:"Entlang der Route",location:"Ort",chooseLocation:"Ort auswählen…",chooseFrom:"Start auswählen…",chooseTo:"Ziel auswählen…",currentGps:"Aktueller GPS-Standort",searchCity:"Stadt suchen",city:"Stadt",search:"Suchen",from:"Von",fromCity:"Startstadt",to:"Nach",toCity:"Zielstadt",calculate:"🚗 Route berechnen und Tankstellen anzeigen",waiting:"📍 Standort wird erwartet...",sort:"Sortieren",bestJourney:"Beste Wahl für die Fahrt",nearest:"Nächste Tankstelle",cheapest:"Günstigster Preis",radius:"Radius",allSwitzerland:"Ganze Schweiz",corridor:"Routenkorridor",fromRoute:"von der Route",brand:"Marke",allBrands:"Alle Marken",age:"Preisealter",anyAge:"Beliebiges Alter",day:"Tag",days:"Tage",resetFilters:"Filter zurücksetzen",resetRoute:"Route zurücksetzen",showSavings:"💰 Mögliche Ersparnis anzeigen",hideSavings:"💰 Mögliche Ersparnis ausblenden",mapFirst:"🗺️ Karte der ersten 10 Ergebnisse",googleTop:"🗺️ Google Maps — Top 10",mapTitle:"🗺️ Erste 10 gefilterte Ergebnisse",close:"Schliessen",routePrompt:"Start und Ziel wählen und dann die Route berechnen.",noMatch:"Keine Tankstellen entsprechen den Filtern.",stations:"Tankstellen",stationsRoute:"Tankstellen entlang der Route",filteredRange:"Gefilterte Preisspanne",mostExpensive:"Am teuersten",difference:"Differenz",saving50:"Mögliche Ersparnis bei 50 L",priceUpdated:"Preis aktualisiert",updatedToday:"Heute aktualisiert",unknown:"Unbekannt",oldDays:"Tage",fromStart:"km vom Start",routeDistance:"Abstand zur Route",map:"Karte",navigate:"Navigieren",help:"Hilfe"
+},
+en:{
+loading:"Loading...",language:"Language",mode:"Mode",near:"Near location",route:"Along route",location:"Location",chooseLocation:"Choose a location…",chooseFrom:"Choose a starting point…",chooseTo:"Choose a destination…",currentGps:"Current GPS",searchCity:"Search city",city:"City",search:"Search",from:"From",fromCity:"From city",to:"To",toCity:"To city",calculate:"🚗 Calculate route and show stations",waiting:"📍 Waiting for location...",sort:"Sort",bestJourney:"Best for journey",nearest:"Nearest Station",cheapest:"Cheapest Price",radius:"Radius",allSwitzerland:"All Switzerland",corridor:"Route corridor",fromRoute:"from route",brand:"Brand",allBrands:"All brands",age:"Price age",anyAge:"Any age",day:"day",days:"days",resetFilters:"Reset filters",resetRoute:"Reset route",showSavings:"💰 Show potential saving",hideSavings:"💰 Hide potential saving",mapFirst:"🗺️ Map first 10 results",googleTop:"🗺️ Google Maps — Top 10",mapTitle:"🗺️ First 10 filtered results",close:"Close",routePrompt:"Choose From and To, then calculate the route.",noMatch:"No stations match the selected filters.",stations:"stations",stationsRoute:"stations along route",filteredRange:"Filtered price range",mostExpensive:"Most expensive",difference:"Difference",saving50:"Potential saving on 50 L",priceUpdated:"Price updated",updatedToday:"Updated today",unknown:"Unknown",oldDays:"days old",fromStart:"km from start",routeDistance:"Route distance",map:"Map",navigate:"Navigate",help:"Help"
+}
+};
+
+const messages={
+fr:{selectLocation:"Choisissez un lieu ou le GPS.",searching:"Recherche de",gettingGps:"Recherche de la position GPS...",gpsError:"Erreur GPS",gpsUnavailable:"La position GPS n'est pas encore disponible.",enterFromCity:"Saisissez une ville de départ.",selectFrom:"Choisissez un lieu de départ.",enterToCity:"Saisissez une ville de destination.",selectTo:"Choisissez une destination.",findingRoute:"Calcul de l'itinéraire...",routeNotFound:"Itinéraire introuvable",routeError:"Erreur d'itinéraire",locationNotFound:"Lieu introuvable",mapLoad:"La bibliothèque de cartes n'a pas pu être chargée. Vérifiez la connexion internet.",bestExplanation:"Meilleur pour le trajet = prix + détour.",googleFirst:"Le bouton Google Maps utilise les 10 premiers résultats.",fuel95:"Sans plomb 95",cheapestTag:"LE MOINS CHER"},
+de:{selectLocation:"Ort oder GPS auswählen.",searching:"Suche nach",gettingGps:"GPS-Standort wird ermittelt...",gpsError:"GPS-Fehler",gpsUnavailable:"Der aktuelle GPS-Standort ist noch nicht verfügbar.",enterFromCity:"Startstadt eingeben.",selectFrom:"Startort auswählen.",enterToCity:"Zielstadt eingeben.",selectTo:"Zielort auswählen.",findingRoute:"Route wird berechnet...",routeNotFound:"Route nicht gefunden",routeError:"Routenfehler",locationNotFound:"Ort nicht gefunden",mapLoad:"Die Kartenbibliothek konnte nicht geladen werden. Internetverbindung prüfen.",bestExplanation:"Beste Wahl für die Fahrt = Preis + Umweg.",googleFirst:"Die Google-Maps-Schaltfläche verwendet die ersten 10 Ergebnisse.",fuel95:"Bleifrei 95",cheapestTag:"GÜNSTIGSTE"},
+en:{selectLocation:"Select a location or GPS.",searching:"Searching for",gettingGps:"Getting GPS...",gpsError:"GPS error",gpsUnavailable:"Current GPS is not available yet.",enterFromCity:"Enter a From city.",selectFrom:"Select a From location.",enterToCity:"Enter a To city.",selectTo:"Select a To location.",findingRoute:"Finding route...",routeNotFound:"Route not found",routeError:"Route error",locationNotFound:"Location not found",mapLoad:"The map library could not be loaded. Check the internet connection and try again.",bestExplanation:"Best for journey = price + route detour.",googleFirst:"Google Maps uses the first 10 results.",fuel95:"Unleaded 95",cheapestTag:"CHEAPEST"}
+};
+
+const marketing={
+fr:{savePrefix:"Économisez jusqu’à ",saveSuffix:" sur votre prochain plein d’essence grâce à notre application gratuite !",generic:"Économisez sur votre prochain plein d’essence grâce à notre application gratuite !",find:"Trouvez le Sans plomb 95 le moins cher près de chez vous ou sur votre trajet !",today:"Derniers prix disponibles en Suisse",lowest:"Plus bas",highest:"Plus haut",cta:"📍 Choisissez un lieu ou un itinéraire et commencez à économiser !",insufficient:"Pas assez de prix récents disponibles."},
+de:{savePrefix:"Sparen Sie bis zu ",saveSuffix:" bei Ihrer nächsten Tankfüllung – mit unserer kostenlosen App!",generic:"Sparen Sie bei Ihrer nächsten Tankfüllung – mit unserer kostenlosen App!",find:"Finden Sie das günstigste Bleifrei 95 in Ihrer Nähe oder entlang Ihrer Route!",today:"Neueste Preise in der Schweiz",lowest:"Tiefster Preis",highest:"Höchster Preis",cta:"📍 Ort oder Route wählen und jetzt sparen!",insufficient:"Nicht genügend aktuelle Preise verfügbar."},
+en:{savePrefix:"Save up to ",saveSuffix:" on your next fill-up with our free app!",generic:"Save money on your next fill-up with our free app!",find:"Find the cheapest Unleaded 95 near you or along your route!",today:"Latest prices in Switzerland",lowest:"Lowest",highest:"Highest",cta:"📍 Choose a location or route and start saving!",insufficient:"Not enough recent prices are available."}
+};
+
+function tm(key){
+return messages[currentLanguage]?.[key]||messages.en[key]||key;
+}
+
+const reviewText={
+fr:{button:"Avis",title:"Avis des utilisateurs",formTitle:"Donnez votre avis",rating:"Note",name:"Nom (facultatif)",comment:"Commentaire",submit:"Envoyer mon avis",close:"Fermer",loading:"Chargement des avis…",none:"Aucun avis publié pour le moment. Soyez le premier !",reviews:"avis",anonymous:"Anonyme",chooseRating:"Choisissez une note de 1 à 5 étoiles.",shortComment:"Le commentaire doit contenir au moins 3 caractères.",sending:"Envoi en cours…",thanks:"Merci ! Votre avis est maintenant publié.",error:"Impossible d’envoyer l’avis. Veuillez réessayer.",loadError:"Impossible de charger les avis pour le moment."},
+de:{button:"Bewertungen",title:"Bewertungen",formTitle:"Ihre Bewertung",rating:"Bewertung",name:"Name (optional)",comment:"Kommentar",submit:"Bewertung senden",close:"Schliessen",loading:"Bewertungen werden geladen…",none:"Noch keine veröffentlichten Bewertungen. Seien Sie der Erste!",reviews:"Bewertungen",anonymous:"Anonym",chooseRating:"Bitte 1 bis 5 Sterne auswählen.",shortComment:"Der Kommentar muss mindestens 3 Zeichen enthalten.",sending:"Wird gesendet…",thanks:"Danke! Ihre Bewertung ist jetzt veröffentlicht.",error:"Die Bewertung konnte nicht gesendet werden. Bitte erneut versuchen.",loadError:"Bewertungen können derzeit nicht geladen werden."},
+en:{button:"Reviews",title:"User reviews",formTitle:"Leave a review",rating:"Rating",name:"Name (optional)",comment:"Comment",submit:"Submit review",close:"Close",loading:"Loading reviews…",none:"No published reviews yet. Be the first!",reviews:"reviews",anonymous:"Anonymous",chooseRating:"Choose a rating from 1 to 5 stars.",shortComment:"The comment must contain at least 3 characters.",sending:"Sending…",thanks:"Thank you! Your review is now published.",error:"The review could not be submitted. Please try again.",loadError:"Reviews cannot be loaded right now."}
+};
+
+function rt(key){return reviewText[currentLanguage]?.[key]||reviewText.en[key]||key;}
+
+function tr(key){
+return translations[currentLanguage]?.[key]||translations.en[key]||key;
+}
+
+function setControlLabel(id,text){
+const label=document.getElementById(id)?.parentElement.querySelector("label b");
+if(label)label.innerText=text;
+}
+
+function setOptionText(id,value,text){
+const option=document.querySelector("#"+id+" option[value='"+value+"']");
+if(option)option.innerText=text;
+}
+
+function applyLanguage(){
+const selectedSort=document.getElementById("sort").value;
+document.documentElement.lang=currentLanguage;
+document.getElementById("language").value=currentLanguage;
+document.getElementById("languageLabel").innerText=tr("language");
+
+setControlLabel("mode",tr("mode"));
+setControlLabel("location",tr("location"));
+setControlLabel("citySearch",tr("city"));
+setControlLabel("routeFrom",tr("from"));
+setControlLabel("routeFromCity",tr("fromCity"));
+setControlLabel("routeTo",tr("to"));
+setControlLabel("routeToCity",tr("toCity"));
+setControlLabel("sort",tr("sort"));
+setControlLabel("radius",tr("radius"));
+setControlLabel("corridor",tr("corridor"));
+setControlLabel("brand",tr("brand"));
+setControlLabel("age",tr("age"));
+
+setOptionText("mode","near","📍 "+tr("near"));
+setOptionText("mode","route","🚗 "+tr("route"));
+setOptionText("location","",tr("chooseLocation"));
+setOptionText("routeFrom","",tr("chooseFrom"));
+setOptionText("routeTo","",tr("chooseTo"));
+
+["location","routeFrom","routeTo"].forEach(id=>{
+setOptionText(id,"current","📍 "+tr("currentGps"));
+setOptionText(id,"search","🔎 "+tr("searchCity"));
+});
+
+setOptionText("sort","score",tr("bestJourney"));
+setOptionText("sort","distance",tr("nearest"));
+setOptionText("sort","price",tr("cheapest"));
+setOptionText("radius","9999",tr("allSwitzerland"));
+["2","5","10","20"].forEach(v=>setOptionText("corridor",v,"≤ "+v+" km "+tr("fromRoute")));
+setOptionText("brand","all",tr("allBrands"));
+setOptionText("age","all",tr("anyAge"));
+["1","3","7","14","30"].forEach(v=>setOptionText("age",v,"≤ "+v+" "+(v==="1"?tr("day"):tr("days"))));
+
+document.getElementById("citySearchButton").innerText=tr("search");
+document.getElementById("calculateRouteButton").innerText=tr("calculate");
+document.getElementById("mapButton").innerText=tr("mapFirst");
+document.getElementById("mapTitle").innerText=tr("mapTitle");
+document.getElementById("mapCloseButton").innerText=tr("close");
+document.getElementById("helpCloseButton").innerText=tr("close");
+applyReviewLanguage();
+
+updateSavingsButton(displayedRows.length>0);
+applyModeControls();
+document.getElementById("sort").value=selectedSort;
+if(stations.length){
+if(
+document.getElementById("mode").value==="route"&&
+!routeGeometry.length
+){
+document.getElementById("results").innerHTML=
+"<div class='card empty'>"+tr("routePrompt")+"</div>";
+}else if(currentPosition){
+showStations();
+}else{
+showWelcome();
+}
+}
+}
+
+function getRecentSwissPriceStats(){
+const prices=[];
+
+stations.forEach(station=>{
+const price=Number(station.price95);
+const updated=getPriceUpdate(station);
+const age=getAgeDays(updated);
+if(Number.isFinite(price)&&age!==null&&age<=3)
+prices.push(price);
+});
+
+if(prices.length<2)return null;
+
+const lowest=Math.min(...prices);
+const highest=Math.max(...prices);
+
+return{
+lowest:lowest,
+highest:highest,
+saving:(highest-lowest)*50,
+count:prices.length
+};
+}
+
+function showWelcome(){
+const copy=marketing[currentLanguage]||marketing.en;
+const stats=getRecentSwissPriceStats();
+
+const headline=stats?
+copy.savePrefix+"<span class='marketing-saving'>CHF "+stats.saving.toFixed(2)+"</span>"+copy.saveSuffix:
+copy.generic;
+
+let statsHtml=
+"<div class='marketing-stats'><b>"+copy.today+"</b><br>";
+
+if(stats){
+statsHtml+=
+"⛽ "+copy.lowest+": <b>CHF "+stats.lowest.toFixed(3)+"/L</b><br>"+
+"🔺 "+copy.highest+": <b>CHF "+stats.highest.toFixed(3)+"/L</b>";
+}else{
+statsHtml+=copy.insufficient;
+}
+
+statsHtml+="</div>";
+
+document.getElementById("results").innerHTML=
+"<div class='card welcome-card'>"+
+"<h2>"+headline+"</h2>"+
+"<div class='marketing-copy'>"+copy.find+"</div>"+
+statsHtml+
+"<div class='marketing-cta'>"+copy.cta+"</div>"+
+"</div>";
+}
 
 const locations={
 
@@ -227,9 +562,10 @@ populateBrands();
 
 document.getElementById("status").innerHTML=
 stations.length+
-" stations • Retrieved: "+
+" "+tr("stations")+" • "+
 formatDate(data.updated);
 
+showWelcome();
 setLocationFromSelection();
 
 })
@@ -298,14 +634,37 @@ return;
 
 cityRow.style.display="none";
 
+if(!value){
+
+currentPosition=null;
+displayedRows=[];
+updateSavingsButton(false);
+updateMapButton(false);
+document.getElementById("locationInfo").innerText=tr("waiting");
+showWelcome();
+return;
+
+}
+
 if(value==="current"){
 
-if(currentPosition){
-showCurrentLocation();
-}else{
+if(gpsPosition){
+
+currentPosition={
+lat:gpsPosition.lat,
+lng:gpsPosition.lng
+};
+
 document.getElementById("locationInfo").innerHTML=
-"📍 Tap GPS to use your current location.";
+"📍 <b>"+tr("currentGps")+"</b><br>"+
+currentPosition.lat.toFixed(5)+
+", "+
+currentPosition.lng.toFixed(5);
+
 showStations();
+
+}else{
+getCurrentLocation();
 }
 
 return;
@@ -322,7 +681,7 @@ lng:loc.lng
 };
 
 document.getElementById("locationInfo").innerHTML=
-"📍 Using <b>"+loc.name+"</b>";
+"📍 <b>"+loc.name+"</b>";
 
 showStations();
 
@@ -339,7 +698,7 @@ document.getElementById("citySearch").value.trim();
 if(!city)return;
 
 document.getElementById("locationInfo").innerHTML=
-"🔎 Searching for "+escapeHTML(city)+"...";
+"🔎 "+tm("searching")+" "+escapeHTML(city)+"...";
 
 fetch(
 "https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=ch&limit=1&q="+
@@ -358,7 +717,7 @@ headers:{
 if(!data.length){
 
 document.getElementById("locationInfo").innerHTML=
-"❌ Swiss city not found.";
+"❌ "+tm("locationNotFound")+".";
 return;
 
 }
@@ -380,7 +739,7 @@ showStations();
 .catch(e=>{
 
 document.getElementById("locationInfo").innerHTML=
-"❌ City search failed.";
+"❌ "+tm("routeError")+".";
 
 });
 
@@ -389,7 +748,7 @@ document.getElementById("locationInfo").innerHTML=
 
 /* GPS */
 
-function getCurrentLocation(){
+function getCurrentLocation(target){
 
 if(!navigator.geolocation){
 
@@ -398,7 +757,7 @@ return;
 }
 
 document.getElementById("locationInfo").innerHTML=
-"📍 Getting GPS...";
+"📍 "+tm("gettingGps");
 
 navigator.geolocation.getCurrentPosition(
 
@@ -409,22 +768,36 @@ lat:p.coords.latitude,
 lng:p.coords.longitude
 };
 
+gpsPosition={
+lat:currentPosition.lat,
+lng:currentPosition.lng
+};
+
+if(target==="from"){
+document.getElementById("routeFrom").value="current";
+}else if(target==="to"){
+document.getElementById("routeTo").value="current";
+}else{
 document.getElementById("location").value="current";
+}
 
 document.getElementById("locationInfo").innerHTML=
-"📍 <b>Current location</b><br>"+
+"📍 <b>"+tr("currentGps")+"</b><br>"+
 currentPosition.lat.toFixed(5)+
 ", "+
 currentPosition.lng.toFixed(5);
 
-showStations();
+if(
+document.getElementById("mode").value!=="route"||
+routeGeometry.length
+)showStations();
 
 },
 
 e=>{
 
 document.getElementById("locationInfo").innerHTML=
-"❌ GPS error: "+escapeHTML(e.message);
+"❌ "+tm("gpsError")+": "+escapeHTML(e.message);
 
 },
 
@@ -441,27 +814,171 @@ maximumAge:60000
 
 /* ROUTE */
 
-function calculateRoute(){
+function invalidateRoute(){
 
-const from=
-document.getElementById("routeFrom").value.trim();
+routeGeometry=[];
+routeResults=[];
+routeStart=null;
+routeEnd=null;
 
-const to=
-document.getElementById("routeTo").value.trim();
+document.getElementById("routeActions").style.display="none";
+updateSavingsButton(false);
+displayedRows=[];
+updateMapButton(false);
+closeResultsMap();
+applyModeControls();
 
-if(!from||!to){
-
-alert("Enter From and To.");
-return;
+if(document.getElementById("mode").value==="route"){
+document.getElementById("results").innerHTML=
+"<div class='card empty'>"+tr("routePrompt")+"</div>";
+}
 
 }
 
+function setRouteFromSelection(){
+
+const value=
+document.getElementById("routeFrom").value;
+
+document.getElementById("routeFromCityRow").style.display=
+value==="search"?"flex":"none";
+
+invalidateRoute();
+
+if(value==="current"&&!gpsPosition)
+getCurrentLocation("from");
+
+}
+
+function resolveRouteFrom(){
+
+const value=
+document.getElementById("routeFrom").value;
+
+if(value==="current"){
+
+if(!gpsPosition)
+return Promise.reject(
+new Error(tm("gpsUnavailable"))
+);
+
+return Promise.resolve({
+lat:gpsPosition.lat,
+lng:gpsPosition.lng,
+label:tr("currentGps")
+});
+
+}
+
+if(value==="search"){
+
+const city=
+document.getElementById("routeFromCity").value.trim();
+
+if(!city)
+return Promise.reject(
+new Error(tm("enterFromCity"))
+);
+
+return geocode(city).then(point=>({
+lat:point.lat,
+lng:point.lng,
+label:city
+}));
+
+}
+
+const loc=locations[value];
+
+if(!loc)
+return Promise.reject(
+new Error(tm("selectFrom"))
+);
+
+return Promise.resolve({
+lat:loc.lat,
+lng:loc.lng,
+label:loc.name
+});
+
+}
+
+function setRouteToSelection(){
+
+const value=
+document.getElementById("routeTo").value;
+
+document.getElementById("routeToCityRow").style.display=
+value==="search"?"flex":"none";
+
+invalidateRoute();
+
+if(value==="current"&&!gpsPosition)
+getCurrentLocation("to");
+
+}
+
+function resolveRouteTo(){
+
+const value=
+document.getElementById("routeTo").value;
+
+if(value==="current"){
+
+if(!gpsPosition)
+return Promise.reject(
+new Error(tm("gpsUnavailable"))
+);
+
+return Promise.resolve({
+lat:gpsPosition.lat,
+lng:gpsPosition.lng,
+label:tr("currentGps")
+});
+
+}
+
+if(value==="search"){
+
+const city=
+document.getElementById("routeToCity").value.trim();
+
+if(!city)
+return Promise.reject(
+new Error(tm("enterToCity"))
+);
+
+return geocode(city).then(point=>({
+lat:point.lat,
+lng:point.lng,
+label:city
+}));
+
+}
+
+const loc=locations[value];
+
+if(!loc)
+return Promise.reject(
+new Error(tm("selectTo"))
+);
+
+return Promise.resolve({
+lat:loc.lat,
+lng:loc.lng,
+label:loc.name
+});
+
+}
+
+function calculateRoute(){
+
 document.getElementById("locationInfo").innerHTML=
-"🚗 Finding route...";
+"🚗 "+tm("findingRoute");
 
 Promise.all([
-geocode(from),
-geocode(to)
+resolveRouteFrom(),
+resolveRouteTo()
 ])
 
 .then(points=>{
@@ -484,7 +1001,7 @@ return fetch(url);
 .then(data=>{
 
 if(!data.routes||!data.routes.length)
-throw new Error("Route not found");
+throw new Error(tm("routeNotFound"));
 
 routeGeometry=
 data.routes[0].geometry.coordinates.map(
@@ -493,11 +1010,19 @@ p=>({lng:p[0],lat:p[1]})
 
 currentPosition=routeStart;
 
+document.getElementById("sort").value="price";
+document.getElementById("corridor").value="5";
+document.getElementById("brand").value="all";
+document.getElementById("age").value="3";
+showSavings=false;
+
+applyModeControls();
+
 document.getElementById("locationInfo").innerHTML=
 "🚗 <b>"+
-escapeHTML(from)+
+escapeHTML(routeStart.label)+
 " → "+
-escapeHTML(to)+
+escapeHTML(routeEnd.label)+
 "</b><br>"+
 (data.routes[0].distance/1000).toFixed(1)+
 " km route";
@@ -505,13 +1030,14 @@ escapeHTML(to)+
 document.getElementById("routeActions").style.display="block";
 
 showStations();
+openResultsMap();
 
 })
 
 .catch(e=>{
 
 document.getElementById("locationInfo").innerHTML=
-"❌ Route error: "+escapeHTML(e.message);
+"❌ "+tm("routeError")+": "+escapeHTML(e.message);
 
 });
 
@@ -551,7 +1077,7 @@ headers:{
 .then(data=>{
 
 if(!data.length)
-throw new Error("Location not found: "+text);
+throw new Error(tm("locationNotFound")+": "+text);
 
 return{
 lat:Number(data[0].lat),
@@ -644,7 +1170,8 @@ function formatDate(v){
 if(!v)return"unknown";
 
 return new Date(v).toLocaleString(
-"de-CH",
+currentLanguage==="fr"?"fr-CH":
+(currentLanguage==="de"?"de-CH":"en-GB"),
 {
 dateStyle:"short",
 timeStyle:"short"
@@ -674,6 +1201,144 @@ return(
 encodeURIComponent(s.lat+","+s.lng)+
 "&travelmode=driving"
 );
+
+}
+
+
+/* FILTERED RESULTS MAP */
+
+function updateMapButton(hasRows){
+
+document.getElementById("mapButton").disabled=!hasRows;
+
+}
+
+function openResultsMap(){
+
+if(!displayedRows.length)return;
+
+if(typeof L==="undefined"){
+alert(tm("mapLoad"));
+return;
+}
+
+document.getElementById("mapOverlay").style.display="block";
+renderResultsMap();
+
+}
+
+function closeResultsMap(){
+
+document.getElementById("mapOverlay").style.display="none";
+
+}
+
+function renderResultsMap(){
+
+if(typeof L==="undefined"||!displayedRows.length)return;
+
+if(!resultsMap){
+
+resultsMap=L.map("resultsMap");
+
+resultsMap.createPane("routePane");
+resultsMap.getPane("routePane").style.zIndex="450";
+
+resultsMap.createPane("cheapestPane");
+resultsMap.getPane("cheapestPane").style.zIndex="700";
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+maxZoom:19,
+attribution:"&copy; OpenStreetMap contributors"
+}
+).addTo(resultsMap);
+
+resultsMapLayer=L.layerGroup().addTo(resultsMap);
+resultsRouteLayer=L.layerGroup().addTo(resultsMap);
+
+}
+
+resultsMapLayer.clearLayers();
+resultsRouteLayer.clearLayers();
+
+const top=
+displayedRows.slice(0,10);
+
+const lowestPrice=
+Math.min(...top.map(x=>x.price));
+
+const bounds=[];
+
+if(
+document.getElementById("mode").value==="route"&&
+routeGeometry.length
+){
+
+const routePoints=
+routeGeometry.map(p=>[p.lat,p.lng]);
+
+L.polyline(routePoints,{
+pane:"routePane",
+color:"white",
+weight:9,
+opacity:.9
+}).addTo(resultsRouteLayer);
+
+L.polyline(routePoints,{
+pane:"routePane",
+color:"#ef6c00",
+weight:5,
+opacity:1
+}).addTo(resultsRouteLayer);
+
+routePoints.forEach(point=>bounds.push(point));
+
+}
+
+top.forEach((x,i)=>{
+
+const s=x.station;
+const cheapest=x.price===lowestPrice;
+
+const icon=L.divIcon({
+className:"price-map-icon",
+html:
+"<div class='price-map-label"+
+(cheapest?" cheapest":"")+
+"'>"+x.price.toFixed(3)+
+"<span>#"+(i+1)+"</span></div>",
+iconSize:[62,38],
+iconAnchor:[31,19]
+});
+
+const marker=L.marker(
+[Number(s.lat),Number(s.lng)],
+{
+icon:icon,
+pane:cheapest?"cheapestPane":"markerPane",
+zIndexOffset:cheapest?1000:0
+}
+).addTo(resultsMapLayer);
+
+marker.bindPopup(
+"<b>"+escapeHTML(s.name||"Unknown")+"</b><br>"+
+escapeHTML(s.address||"")+"<br>"+
+"<span class='map-popup-price'>"+x.price.toFixed(3)+" CHF/L</span><br>"+
+x.distance.toFixed(1)+" "+tr("fromStart")+"<br>"+
+"<a href='"+navigateLink(s)+"' target='_blank' rel='noopener'>"+tr("navigate")+"</a>"
+);
+
+bounds.push([Number(s.lat),Number(s.lng)]);
+
+});
+
+setTimeout(()=>{
+resultsMap.invalidateSize();
+if(bounds.length===1)resultsMap.setView(bounds[0],13);
+else resultsMap.fitBounds(bounds,{padding:[35,35]});
+},0);
 
 }
 
@@ -728,14 +1393,48 @@ window.open(url,"_blank");
 }
 
 
+/* SAVING SUMMARY */
+
+function updateSavingsButton(hasRows){
+
+const button=
+document.getElementById("savingsButton");
+
+if(!hasRows)showSavings=false;
+
+button.disabled=!hasRows;
+button.innerHTML=showSavings?
+tr("hideSavings"):
+tr("showSavings");
+
+}
+
+function toggleSavings(){
+
+const button=
+document.getElementById("savingsButton");
+
+if(button.disabled)return;
+
+showSavings=!showSavings;
+showStations();
+
+}
+
+
 /* SHOW */
 
 function showStations(){
 
 if(!currentPosition){
 
+updateSavingsButton(false);
+displayedRows=[];
+updateMapButton(false);
+closeResultsMap();
+
 document.getElementById("results").innerHTML=
-"<div class='card empty'>Select a location or GPS.</div>";
+"<div class='card empty'>"+tm("selectLocation")+"</div>";
 
 return;
 
@@ -756,17 +1455,8 @@ document.getElementById("sort").value;
 const brand=
 document.getElementById("brand").value;
 
-const before=
-document.getElementById("updateBefore").value;
-
 const maxAge=
 document.getElementById("age").value;
-
-let beforeTime=null;
-
-if(before)
-beforeTime=
-new Date(before+"T23:59:59").getTime();
 
 let rows=[];
 
@@ -818,15 +1508,6 @@ const updateTime=
 update?
 new Date(update).getTime():
 null;
-
-if(
-beforeTime!==null &&
-(
-updateTime===null||
-updateTime>beforeTime
-)
-)
-return;
 
 const age=getAgeDays(update);
 
@@ -933,13 +1614,6 @@ a.price-b.price||
 a.distance-b.distance
 );
 
-}else if(sort==="oldest"){
-
-rows.sort((a,b)=>
-(a.updateTime||Infinity)-
-(b.updateTime||Infinity)
-);
-
 }else{
 
 rows.sort((a,b)=>
@@ -955,22 +1629,64 @@ document.getElementById("routeActions").style.display="none";
 }
 
 
+/* MAP DATA */
+
+displayedRows=rows;
+updateMapButton(rows.length>0);
+
+if(
+document.getElementById("mapOverlay").style.display==="block"
+){
+renderResultsMap();
+}
+
+
 /* OUTPUT */
+
+updateSavingsButton(rows.length>0);
 
 let html=
 "<h2>"+
 rows.length+
 (mode==="route"?
-" stations along route":
-" stations")+
+" "+tr("stationsRoute"):
+" "+tr("stations"))+
 "</h2>";
+
+if(rows.length&&showSavings){
+
+const filteredPrices=
+rows.map(x=>x.price);
+
+const lowestPrice=
+Math.min(...filteredPrices);
+
+const highestPrice=
+Math.max(...filteredPrices);
+
+const priceDelta=
+highestPrice-lowestPrice;
+
+const fiftyLitreSaving=
+priceDelta*50;
+
+html+=
+"<div class='card'>"+
+"⛽ <b>"+tr("filteredRange")+"</b><br>"+
+tr("cheapest")+": <b>"+lowestPrice.toFixed(3)+" CHF/L</b><br>"+
+tr("mostExpensive")+": <b>"+highestPrice.toFixed(3)+" CHF/L</b><br>"+
+tr("difference")+": <b>"+priceDelta.toFixed(3)+" CHF/L</b><br>"+
+tr("saving50")+": <b>CHF "+
+fiftyLitreSaving.toFixed(2)+"</b>"+
+"</div>";
+
+}
 
 if(mode==="route"&&rows.length){
 
 html+=
 "<div class='card'>"+
-"⭐ <b>Best for journey</b> = price + route detour."+
-"<br>Google Maps button uses the first 10 results."+
+"⭐ <b>"+tm("bestExplanation")+"</b>"+
 "</div>";
 
 }
@@ -979,7 +1695,7 @@ if(!rows.length){
 
 html+=
 "<div class='card empty'>"+
-"No stations match the selected filters."+
+tr("noMatch")+
 "</div>";
 
 }
@@ -994,14 +1710,14 @@ rows.forEach((x,i)=>{
 
 const s=x.station;
 
-let ageText="Unknown";
+let ageText=tr("unknown");
 let ageClass="warning";
 
 if(x.update){
 
 if(x.age<1){
 
-ageText="Updated today";
+ageText=tr("updatedToday");
 ageClass="recent";
 
 }else{
@@ -1010,7 +1726,7 @@ const d=Math.floor(x.age);
 
 ageText=
 d+
-(d===1?" day old":" days old");
+" "+(d===1?tr("day"):tr("oldDays"));
 
 ageClass=
 d>=7?"old":"warning";
@@ -1038,14 +1754,14 @@ escapeHTML(s.address||"")+
 
 "<div class='distance'>"+
 x.distance.toFixed(1)+
-" km from start"+
+" "+tr("fromStart")+
 "</div>";
 
 if(mode==="route"){
 
 html+=
 "<div class='detour'>"+
-"↪ Route distance: "+
+"↪ "+tr("routeDistance")+": "+
 x.routeDistance.toFixed(1)+
 " km"+
 "</div>";
@@ -1062,16 +1778,16 @@ x.price.toFixed(3)+
 "</div>"+
 
 "<div class='price-label'>"+
-"Bleifrei 95"+
+tm("fuel95")+
 (x.price===cheapest?
-" • CHEAPEST":
+" • "+tm("cheapestTag"):
 "")+
 "</div>"+
 
 "<hr>"+
 
 "<div class='price-update'>"+
-"<b>Price updated:</b> "+
+"<b>"+tr("priceUpdated")+":</b> "+
 (x.update?
 formatDate(x.update):
 "Unknown")+
@@ -1085,11 +1801,11 @@ ageText+
 
 "<a target='_blank' href='"+
 mapsLink(s)+
-"'>🗺️ Map</a>"+
+"'>🗺️ "+tr("map")+"</a>"+
 
 "<a class='navigate' target='_blank' href='"+
 navigateLink(s)+
-"'>🚗 Navigate</a>"+
+"'>🚗 "+tr("navigate")+"</a>"+
 
 "</div>"+
 
@@ -1106,18 +1822,23 @@ document.getElementById("results").innerHTML=html;
 
 function clearFilters(){
 
-document.getElementById("updateBefore").value="";
-document.getElementById("age").value="all";
+document.getElementById("age").value="3";
 document.getElementById("brand").value="all";
 document.getElementById("radius").value="25";
 document.getElementById("corridor").value="5";
-document.getElementById("sort").value="score";
+document.getElementById("sort").value="price";
+showSavings=false;
 
-routeGeometry=[];
-routeResults=[];
+if(document.getElementById("mode").value==="route"){
+
+invalidateRoute();
+return;
+
+}
 
 document.getElementById("routeActions").style.display="none";
 
+applyModeControls();
 showStations();
 
 }
@@ -1137,28 +1858,328 @@ return String(v)
 }
 
 
+/* CONTROL HELP */
+
+const controlHelp={
+
+language:
+"Choose French, German, or English. The selected language is remembered on this device.",
+
+mode:
+"Near location finds stations within the selected radius. Along route finds stations inside the selected corridor around a calculated journey.",
+
+location:
+"Choose Current GPS to request your device location, select a saved place, or choose Search city to find another Swiss location.",
+
+routeFrom:
+"Choose Current GPS, a saved place, or Search city as the starting point for the route.",
+
+routeTo:
+"Choose Current GPS, a saved place, or Search city as the destination for the route.",
+
+sort:
+"Cheapest Price puts the lowest price first and uses distance when prices match. Nearest Station puts the shortest straight-line distance first. Along route also offers Best for journey, which balances price and route detour.",
+
+radius:
+"The maximum straight-line distance from your selected location. This is used only in Near location mode.",
+
+corridor:
+"The maximum distance a station may be from the calculated route. This is used only in Along route mode.",
+
+brand:
+"Show all fuel brands or limit the results to one selected brand.",
+
+age:
+"Show only prices updated within the selected number of days. The default is 3 days. Stations with an unknown update date are excluded.",
+
+calculateRoute:
+"Calculate a driving route from the selected From location to the selected To location, then show matching stations inside the route corridor.",
+
+resetFilters:
+"Restore the Near location defaults: Cheapest Price, 25 km radius, All brands, and prices no more than 3 days old.",
+
+resetRoute:
+"Clear the calculated route and its results, restore the default filters, and return to the From and To route setup.",
+
+savings:
+"Compare the cheapest and most expensive prices in the filtered results and estimate the potential difference for a 50-litre fill.",
+
+resultsMap:
+"Open an interactive OpenStreetMap showing the first 10 currently filtered and sorted results. Price is shown prominently on every marker.",
+
+googleTop10:
+"Open the first 10 route results as stops in Google Maps. Google may adjust the journey using its own routing and current traffic information."
+
+};
+
+const controlHelpTitle={
+mode:"Mode help",
+location:"Location help",
+routeFrom:"From help",
+routeTo:"To help",
+sort:"Sort help",
+radius:"Radius help",
+corridor:"Route corridor help",
+brand:"Brand help",
+age:"Price age help",
+calculateRoute:"Calculate route help",
+resetFilters:"Reset filters help",
+resetRoute:"Reset route help",
+savings:"Potential saving help",
+resultsMap:"Results map help",
+googleTop10:"Google Maps Top 10 help"
+};
+
+const localizedHelp={
+fr:{
+language:"Choisissez le français, l'allemand ou l'anglais. La langue choisie est mémorisée sur cet appareil.",
+mode:"Près d'un lieu recherche dans le rayon choisi. Le long d'un itinéraire recherche dans le couloir autour du trajet calculé.",
+location:"Choisissez la position GPS actuelle, un lieu enregistré ou Rechercher une ville.",
+routeFrom:"Choisissez le GPS, un lieu enregistré ou une ville comme point de départ.",
+routeTo:"Choisissez le GPS, un lieu enregistré ou une ville comme destination.",
+sort:"Prix le moins cher classe d'abord par prix, puis par distance en cas d'égalité. Station la plus proche classe par distance. Le mode itinéraire propose aussi le meilleur compromis prix/détour.",
+radius:"Distance maximale en ligne droite depuis le lieu choisi. Utilisé uniquement en mode Près d'un lieu.",
+corridor:"Distance maximale entre une station et l'itinéraire calculé. Utilisé uniquement en mode itinéraire.",
+brand:"Affichez toutes les marques ou limitez les résultats à une marque.",
+age:"Affiche uniquement les prix mis à jour dans le nombre de jours choisi. La valeur par défaut est 3 jours. Les dates inconnues sont exclues.",
+calculateRoute:"Calcule un trajet entre le départ et la destination, puis affiche les stations situées dans le couloir choisi.",
+resetFilters:"Rétablit les valeurs par défaut: prix le moins cher, rayon de 25 km, toutes les marques et prix de 3 jours maximum.",
+resetRoute:"Efface l'itinéraire et ses résultats, rétablit les filtres et revient au choix du départ et de la destination.",
+savings:"Compare les prix minimum et maximum filtrés et estime la différence pour un plein de 50 litres.",
+resultsMap:"Ouvre OpenStreetMap avec les 10 premiers résultats filtrés et triés. Le prix est affiché sur chaque marqueur.",
+googleTop10:"Ouvre les 10 premiers résultats comme étapes dans Google Maps, qui peut adapter le trajet au trafic actuel."
+},
+de:{
+language:"Französisch, Deutsch oder Englisch wählen. Die Auswahl wird auf diesem Gerät gespeichert.",
+mode:"In der Nähe sucht innerhalb des gewählten Radius. Entlang der Route sucht im Korridor um die berechnete Fahrt.",
+location:"Aktuellen GPS-Standort, einen gespeicherten Ort oder Stadt suchen wählen.",
+routeFrom:"GPS, einen gespeicherten Ort oder eine gesuchte Stadt als Startpunkt wählen.",
+routeTo:"GPS, einen gespeicherten Ort oder eine gesuchte Stadt als Ziel wählen.",
+sort:"Günstigster Preis sortiert zuerst nach Preis und bei Gleichstand nach Entfernung. Nächste Tankstelle sortiert nach Entfernung. Im Routenmodus gibt es zusätzlich die beste Kombination aus Preis und Umweg.",
+radius:"Maximale Luftlinienentfernung vom gewählten Ort. Nur im Modus In der Nähe verwendet.",
+corridor:"Maximaler Abstand einer Tankstelle von der berechneten Route. Nur im Routenmodus verwendet.",
+brand:"Alle Marken anzeigen oder die Ergebnisse auf eine Marke beschränken.",
+age:"Nur Preise anzeigen, die innerhalb der gewählten Tage aktualisiert wurden. Standard sind 3 Tage. Unbekannte Daten werden ausgeschlossen.",
+calculateRoute:"Eine Fahrtroute von Start bis Ziel berechnen und Tankstellen innerhalb des Routenkorridors anzeigen.",
+resetFilters:"Standardwerte wiederherstellen: günstigster Preis, 25-km-Radius, alle Marken und höchstens 3 Tage alte Preise.",
+resetRoute:"Berechnete Route und Ergebnisse löschen, Standardfilter wiederherstellen und zur Start-/Zielauswahl zurückkehren.",
+savings:"Günstigsten und teuersten gefilterten Preis vergleichen und die mögliche Differenz für 50 Liter berechnen.",
+resultsMap:"OpenStreetMap mit den ersten 10 gefilterten und sortierten Ergebnissen öffnen. Der Preis steht auf jedem Marker.",
+googleTop10:"Die ersten 10 Routenergebnisse als Stopps in Google Maps öffnen. Google kann die Fahrt anhand des aktuellen Verkehrs anpassen."
+}
+};
+
+function showControlHelp(key){
+
+if(
+key==="resetFilters"&&
+document.getElementById("mode").value==="route"&&
+routeGeometry.length
+){
+key="resetRoute";
+}
+
+if(!controlHelp[key])return;
+
+document.getElementById("helpTitle").innerText=tr("help");
+
+document.getElementById("helpText").innerText=
+(localizedHelp[currentLanguage]?.[key]||controlHelp[key]);
+
+document.getElementById("helpOverlay").style.display="flex";
+
+}
+
+function closeControlHelp(){
+
+document.getElementById("helpOverlay").style.display="none";
+
+}
+
+function applyReviewLanguage(){
+document.getElementById("reviewsButton").textContent="⭐ "+rt("button")+(approvedReviews.length?" ("+approvedReviews.length+")":"");
+document.getElementById("reviewTitle").textContent=rt("title");
+document.getElementById("reviewCloseButton").textContent=rt("close");
+document.getElementById("reviewFormTitle").textContent=rt("formTitle");
+document.getElementById("ratingLabel").textContent=rt("rating");
+document.getElementById("reviewNameLabel").textContent=rt("name");
+document.getElementById("reviewCommentLabel").textContent=rt("comment");
+document.getElementById("reviewSubmit").textContent=rt("submit");
+renderReviews();
+}
+
+function renderReviewStars(){
+const box=document.getElementById("reviewStars");
+box.replaceChildren();
+for(let value=1;value<=5;value++){
+const star=document.createElement("span");
+star.textContent="★";
+star.className=value<=selectedReviewRating?"selected":"";
+star.setAttribute("role","radio");
+star.setAttribute("aria-checked",value===selectedReviewRating?"true":"false");
+star.setAttribute("aria-label",value+" / 5");
+star.tabIndex=0;
+star.onclick=()=>setReviewRating(value);
+star.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setReviewRating(value);}};
+box.appendChild(star);
+}
+}
+
+function setReviewRating(value){
+selectedReviewRating=value;
+document.getElementById("reviewRating").value=String(value);
+renderReviewStars();
+}
+
+function renderReviews(loadError=false){
+const summary=document.getElementById("reviewSummary");
+const list=document.getElementById("reviewList");
+if(!summary||!list)return;
+summary.replaceChildren();
+list.replaceChildren();
+if(loadError){summary.textContent=rt("loadError");return;}
+if(!approvedReviews.length){summary.textContent=rt("none");return;}
+const average=approvedReviews.reduce((sum,item)=>sum+Number(item.rating||0),0)/approvedReviews.length;
+const averageLine=document.createElement("div");
+averageLine.className="review-average";
+averageLine.textContent="★ "+average.toFixed(1)+" / 5";
+const count=document.createElement("div");
+count.textContent=approvedReviews.length+" "+rt("reviews");
+summary.append(averageLine,count);
+approvedReviews.forEach(item=>{
+const card=document.createElement("div");card.className="review-item";
+const head=document.createElement("div");head.className="review-item-head";
+const who=document.createElement("b");who.textContent=(item.display_name||"").trim()||rt("anonymous");
+const date=document.createElement("span");
+try{date.textContent=new Intl.DateTimeFormat(currentLanguage==="fr"?"fr-CH":currentLanguage==="de"?"de-CH":"en-GB",{dateStyle:"medium"}).format(new Date(item.created_at));}catch(e){date.textContent="";}
+head.append(who,date);
+const stars=document.createElement("div");stars.className="review-item-stars";stars.textContent="★".repeat(Number(item.rating)||0)+"☆".repeat(5-(Number(item.rating)||0));
+const comment=document.createElement("div");comment.className="review-comment";comment.textContent=item.comment||"";
+card.append(head,stars,comment);list.appendChild(card);
+});
+}
+
+async function loadReviews(){
+const summary=document.getElementById("reviewSummary");
+summary.textContent=rt("loading");
+try{
+const response=await fetch(SUPABASE_URL+"/rest/v1/reviews?select=id,created_at,display_name,rating,comment,language&approved=eq.true&order=created_at.desc",{headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}});
+if(!response.ok)throw new Error("HTTP "+response.status);
+approvedReviews=await response.json();
+applyReviewLanguage();
+}catch(error){console.error("Review load error",error);renderReviews(true);}
+}
+
+function openReviews(){
+document.getElementById("reviewOverlay").style.display="flex";
+applyReviewLanguage();
+loadReviews();
+}
+
+function closeReviews(){document.getElementById("reviewOverlay").style.display="none";}
+
+async function submitReview(event){
+event.preventDefault();
+const message=document.getElementById("reviewMessage");
+message.className="review-message";
+if(document.getElementById("reviewWebsite").value)return;
+const comment=document.getElementById("reviewComment").value.trim();
+if(selectedReviewRating<1){message.textContent=rt("chooseRating");message.classList.add("error");return;}
+if(comment.length<3){message.textContent=rt("shortComment");message.classList.add("error");return;}
+const button=document.getElementById("reviewSubmit");button.disabled=true;button.textContent=rt("sending");
+try{
+const response=await fetch(SUPABASE_URL+"/rest/v1/reviews",{method:"POST",headers:{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({display_name:document.getElementById("reviewName").value.trim()||null,rating:selectedReviewRating,comment,language:currentLanguage})});
+if(!response.ok)throw new Error("HTTP "+response.status);
+document.getElementById("reviewForm").reset();setReviewRating(0);
+message.textContent=rt("thanks");message.className="review-message success";
+await loadReviews();
+}catch(error){console.error("Review submit error",error);message.textContent=rt("error");message.className="review-message error";}
+finally{button.disabled=false;button.textContent=rt("submit");}
+}
+
+
 /* EVENTS */
+
+function applyModeControls(){
+
+const route=
+document.getElementById("mode").value==="route";
+
+const routeReady=
+routeGeometry.length>0;
+
+document.getElementById("routeBox").style.display=
+route?(routeReady?"none":"block"):"none";
+
+document.getElementById("locationRow").style.display=
+route?"none":"";
+
+document.getElementById("cityRow").style.display=
+route?"none":
+(document.getElementById("location").value==="search"?"flex":"none");
+
+document.getElementById("radiusRow").style.display=
+route?"none":"";
+
+document.getElementById("corridorRow").style.display=
+route&&routeReady?"":"none";
+
+document.getElementById("sortRow").style.display=
+route&&!routeReady?"none":"";
+
+document.getElementById("brandRow").style.display=
+route&&!routeReady?"none":"";
+
+document.getElementById("ageRow").style.display=
+route&&!routeReady?"none":"";
+
+document.getElementById("filterActions").style.display=
+route&&!routeReady?"none":"";
+
+document.getElementById("resetButton").innerText=
+route&&routeReady?tr("resetRoute"):tr("resetFilters");
+
+document.getElementById("resetHelpButton").setAttribute(
+"aria-label",
+route&&routeReady?"Explain Reset route":"Explain Reset filters"
+);
+
+const bestJourney=
+document.getElementById("bestJourneyOption");
+
+bestJourney.hidden=!route;
+bestJourney.disabled=!route;
+
+document.getElementById("sort").value="price";
+
+if(!route){
+
+document.getElementById("routeActions").style.display="none";
+
+}
+
+}
 
 document.getElementById("mode").onchange=function(){
 
 const route=
 this.value==="route";
 
-document.getElementById("routeBox").style.display=
-route?"block":"none";
+applyModeControls();
 
 if(route){
 
-document.getElementById("sort").value="score";
-
 document.getElementById("routeFrom").value=
-document.getElementById("location").value==="current"?
-"Current location":
-(
-locations[
-document.getElementById("location").value
-]?.name||""
-);
+document.getElementById("location").value;
+
+setRouteFromSelection();
+setRouteToSelection();
+return;
+
+}else{
+
+setLocationFromSelection();
+return;
 
 }
 
@@ -1168,6 +2189,24 @@ showStations();
 
 document.getElementById("location").onchange=
 setLocationFromSelection;
+
+document.getElementById("routeFrom").onchange=
+setRouteFromSelection;
+
+document.getElementById("routeFromCity").oninput=
+invalidateRoute;
+
+document.getElementById("routeTo").onchange=
+setRouteToSelection;
+
+document.getElementById("routeToCity").oninput=
+invalidateRoute;
+
+document.getElementById("routeToCity").onkeydown=function(e){
+
+if(e.key==="Enter")calculateRoute();
+
+};
 
 document.getElementById("sort").onchange=
 showStations;
@@ -1181,16 +2220,60 @@ showStations;
 document.getElementById("brand").onchange=
 showStations;
 
-document.getElementById("updateBefore").onchange=
-showStations;
-
 document.getElementById("age").onchange=
 showStations;
+
+document.getElementById("language").onchange=function(){
+
+currentLanguage=this.value;
+localStorage.setItem("petrolLanguage",currentLanguage);
+applyLanguage();
+
+};
+
+document.getElementById("mapOverlay").onclick=function(e){
+
+if(e.target===this)closeResultsMap();
+
+};
+
+document.getElementById("helpOverlay").onclick=function(e){
+
+if(e.target===this)closeControlHelp();
+
+};
+
+document.getElementById("reviewOverlay").onclick=function(e){
+if(e.target===this)closeReviews();
+};
+
+document.getElementById("reviewForm").addEventListener("submit",submitReview);
+
+document.addEventListener("keydown",e=>{
+
+if(e.key==="Escape"){
+closeControlHelp();
+closeResultsMap();
+closeReviews();
+}
+
+});
 
 
 /* START */
 
+if(!translations[currentLanguage])currentLanguage="fr";
+document.getElementById("sort").value="price";
+document.getElementById("status").innerText=tr("loading");
+document.getElementById("locationInfo").innerText=tr("waiting");
+renderReviewStars();
+applyLanguage();
+loadReviews();
 loadData();
 
-</script></body>
+</script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"c8514107679f4ad3acc93dcf510863f9"}'></script>
+<!-- End Cloudflare Web Analytics -->
+</body>
 </html>
