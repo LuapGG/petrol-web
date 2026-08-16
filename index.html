@@ -120,6 +120,8 @@ display:flex;flex-direction:column;overflow:hidden
 display:flex;align-items:center;justify-content:space-between;
 padding:6px 8px;font-size:15px;font-weight:bold
 }
+.map-header-text{display:flex;flex-direction:column;gap:2px}
+.map-legend{font-size:11px;font-weight:normal;color:#188038}
 
 #resultsMap{flex:1;min-height:300px}
 
@@ -311,7 +313,7 @@ hr{border:0;border-top:1px solid #ddd;margin:6px 0}
 </div><div id="routeActions" class="route-actions" style="display:none"></div>
 <div id="mapOverlay" class="map-overlay" role="dialog" aria-modal="true" aria-label="Map of first 10 results">
 <div class="map-panel">
-<div class="map-header"><span id="mapTitle">🗺️ First 10 filtered results</span><button id="mapCloseButton" type="button" onclick="closeResultsMap()">Close</button></div>
+<div class="map-header"><div class="map-header-text"><span id="mapTitle">🗺️ First 10 filtered results</span><span id="mapLegend" class="map-legend">● Green = cheapest result</span></div><button id="mapCloseButton" type="button" onclick="closeResultsMap()">Close</button></div>
 <div id="resultsMap"></div>
 </div>
 </div>
@@ -397,6 +399,12 @@ de:{button:"Bewertungen",title:"Bewertungen",formTitle:"Ihre Bewertung",rating:"
 en:{button:"Reviews",title:"User reviews",formTitle:"Leave a review",rating:"Rating",name:"Name (optional)",comment:"Comment",submit:"Submit review",close:"Close",loading:"Loading reviews…",none:"No published reviews yet. Be the first!",reviews:"reviews",anonymous:"Anonymous",chooseRating:"Choose a rating from 1 to 5 stars.",shortComment:"The comment must contain at least 3 characters.",sending:"Sending…",thanks:"Thank you! Your review is now published.",error:"The review could not be submitted. Please try again.",loadError:"Reviews cannot be loaded right now."}
 };
 
+const mapLegendText={
+fr:"● Vert = résultat le moins cher",
+de:"● Grün = günstigstes Ergebnis",
+en:"● Green = cheapest result"
+};
+
 function rt(key){return reviewText[currentLanguage]?.[key]||reviewText.en[key]||key;}
 
 function tr(key){
@@ -456,6 +464,7 @@ document.getElementById("citySearchButton").innerText=tr("search");
 document.getElementById("calculateRouteButton").innerText=tr("calculate");
 document.getElementById("mapButton").innerText=tr("mapFirst");
 document.getElementById("mapTitle").innerText=tr("mapTitle");
+document.getElementById("mapLegend").innerText=mapLegendText[currentLanguage]||mapLegendText.en;
 document.getElementById("mapCloseButton").innerText=tr("close");
 document.getElementById("helpCloseButton").innerText=tr("close");
 applyReviewLanguage();
