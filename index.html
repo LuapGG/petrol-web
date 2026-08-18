@@ -152,7 +152,9 @@ function updateCompactSearch(){let text="";if(mode==="route"&&routeStart&&routeE
 function collapseSearch(){if(!currentPosition)return;searchCollapsed=true;updateCompactSearch();document.querySelector(".top").classList.add("search-collapsed");document.getElementById("compactSearchBar").classList.remove("hidden");setTimeout(()=>{syncMapLayout();renderMap()},240)}
 function expandSearch(){searchCollapsed=false;document.querySelector(".top").classList.remove("search-collapsed");document.getElementById("compactSearchBar").classList.add("hidden");if(mode==="route")showRouteEntry(true);setTimeout(syncMapLayout,240)}
 function updateReviewBadge(){const badge=document.getElementById("reviewCountBadge");badge.textContent=approvedReviews.length>99?"99+":String(approvedReviews.length);badge.classList.toggle("hidden",approvedReviews.length===0);document.getElementById("reviewsButton").setAttribute("aria-label",t("review")+(approvedReviews.length?" ("+approvedReviews.length+")":""))}
-function getAgeDays(v){if(!v)return null;return Math.max(0,(Date.now()-new Date(v).getTime())/86400000)}
+const SWISS_DAY_FORMATTER=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Zurich",year:"numeric",month:"2-digit",day:"2-digit"});
+function swissDayNumber(value){const date=new Date(value),parts={};if(Number.isNaN(date.getTime()))return null;SWISS_DAY_FORMATTER.formatToParts(date).forEach(part=>{if(part.type!=="literal")parts[part.type]=+part.value});return Date.UTC(parts.year,parts.month-1,parts.day)/86400000}
+function getAgeDays(v){if(!v)return null;const priceDay=swissDayNumber(v),today=swissDayNumber(Date.now());return priceDay===null||today===null?null:Math.max(0,today-priceDay)}
 function getPriceUpdate(s){return s?.fuel95Raw?.fiability?.lastPriceUpdate||null}
 function distance(a,b,c,d){const R=6371,p1=a*Math.PI/180,p2=c*Math.PI/180,dp=(c-a)*Math.PI/180,dl=(d-b)*Math.PI/180;const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
 function distanceToRoute(lat,lng){let best=Infinity;for(const p of routeGeometry){const d=distance(lat,lng,p.lat,p.lng);if(d<best)best=d}return best}
