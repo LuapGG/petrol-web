@@ -25,6 +25,7 @@
     .canton-table thead th:first-child{z-index:3}.canton-table .canton-row:hover td:first-child,.canton-table .canton-row:focus td:first-child{background:var(--blue2)}
     .history-title a{color:var(--blue);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
     .trend-title-value{display:block;margin-top:4px;font-size:14px;font-weight:800}
+    .freshness-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.freshness-table{width:100%;min-width:470px;border-collapse:collapse;font-size:13px}.freshness-table th,.freshness-table td{padding:9px 7px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.freshness-table th:first-child,.freshness-table td:first-child{text-align:left}.freshness-table th{color:var(--muted);font-size:12px}.freshness-table tbody tr:last-child td{border-bottom:0}.freshness-table td:not(:first-child){font-weight:800}
     .error{color:#9d2626;background:#fff0f0;border-color:#ffd1d1}.skeleton{animation:pulse 1.2s infinite alternate;color:transparent!important;background:#edf0f5;border-radius:7px}@keyframes pulse{to{opacity:.5}}
     @media(max-width:480px){.header{align-items:flex-start;flex-wrap:wrap}.header-copy{flex:1}.header-actions{width:100%;justify-content:flex-end}.search-row input{font-size:16px}.half{grid-column:1/-1}}
     @media(min-width:650px){.page{padding-top:28px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wide{grid-column:1/-1}.half{grid-column:span 2}}
@@ -48,6 +49,11 @@
     <article class="card wide">
       <h2 id="trendTitle">Prix médian Suisse<span class="trend-title-value">— : — CHF/L</span></h2><div id="trend"></div>
       <div class="note">Prix médian suisse journalier — calculé à partir des stations ayant mis à jour leur prix au cours des 3 derniers jours.</div>
+    </article>
+
+    <article class="card wide">
+      <h2>Comparaison selon les mises à jour des prix</h2>
+      <div class="freshness-wrap"><table class="freshness-table"><thead><tr><th>Mise à jour du prix</th><th>Stations</th><th>Prix médian</th><th>Prix moyen</th></tr></thead><tbody id="freshnessComparison"><tr><td colspan="4">Chargement…</td></tr></tbody></table></div>
     </article>
 
     <article class="card half">
@@ -126,6 +132,7 @@
     $('status').innerHTML=latest?`<strong>Dernier relevé : ${day(latest.snapshot_date)}</strong> · ${Number(latest.station_count||0).toLocaleString('fr-CH')} stations · ${Number(latest.fresh_station_count||0).toLocaleString('fr-CH')} prix récents`:'<strong>Aucun relevé disponible.</strong>';
 
     const previous=rows.length>1?rows.at(-2):null,medianChange=latest&&previous?Number(latest.median_price)-Number(previous.median_price):null;$('trendTitle').innerHTML=latest?`Prix médian Suisse<span class="trend-title-value">${day(latest.snapshot_date)} : ${money(latest.median_price)} CHF/L ${movement(medianChange)}</span>`:'Prix médian Suisse<span class="trend-title-value">— : — CHF/L</span>';$('trend').innerHTML=trendChart(rows);enableChartTooltip(document.getElementById('trend'));$('coverage').classList.remove('skeleton');$('coverage').textContent=coverage.snapshot_count??0;
+    const freshness=data.freshness_comparison||[];$('freshnessComparison').innerHTML=freshness.length?freshness.map(row=>`<tr><td>≤ ${Number(row.hours)} heures</td><td>${Number(row.station_count||0).toLocaleString('fr-CH')}</td><td>${money(row.median_price)} CHF/L</td><td>${money(row.average_price)} CHF/L</td></tr>`).join(''):'<tr><td colspan="4">Aucune donnée disponible.</td></tr>';
     $('coverageNote').textContent=coverage.first_date?`Du ${day(coverage.first_date)} au ${day(coverage.latest_date)}.`:'En attente du premier relevé.';
     if(data.changes){const c=data.changes;$('changes').className='';$('changes').innerHTML=`<div class="change-grid"><div class="change up"><strong>↑ ${c.increases||0}</strong><span>hausses</span></div><div class="change down"><strong>↓ ${c.decreases||0}</strong><span>baisses</span></div><div class="change same"><strong>${c.unchanged||0}</strong><span>stables</span></div></div><div class="note">${Number(c.matched_stations||0).toLocaleString('fr-CH')} stations comparées · ${c.new_stations||0} nouvelles · ${c.missing_stations||0} absentes</div>`}
     else{$('changes').className='chart-empty';$('changes').textContent='Une deuxième journée est nécessaire pour calculer les changements.'}
