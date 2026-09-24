@@ -15,6 +15,7 @@
     h2{font-size:16px;margin:0 0 13px}.chart{height:170px;width:100%;display:block;touch-action:none}.chart-host{position:relative}.chart-tooltip{position:absolute;z-index:5;pointer-events:none;transform:translate(-50%,-115%);padding:5px 7px;border-radius:7px;background:#0f172a;color:#fff;font-size:11px;line-height:1.2;white-space:nowrap;box-shadow:0 3px 10px rgba(15,23,42,.2)}.chart-empty{height:130px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px}.chart text{font-size:12px;fill:#475569}
     .change-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.change{border-radius:13px;padding:11px 8px;text-align:center;background:#f7f9fc}.change strong{display:block;font-size:20px}.up strong{color:var(--red)}.down strong{color:var(--green)}.same strong{color:var(--muted)}
     .change-trend{margin-top:12px}.change-legend{display:flex;justify-content:center;gap:16px;margin-top:4px;color:var(--muted);font-size:11px;font-weight:700}.change-legend span::before{content:"";display:inline-block;width:9px;height:3px;margin-right:5px;vertical-align:middle;border-radius:2px}.change-legend .legend-up::before{background:var(--red)}.change-legend .legend-down::before{background:var(--green)}
+    .supply-card{overflow:hidden}.supply-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.supply-date{font-size:12px;color:var(--muted);font-weight:750;white-space:nowrap}.supply-median{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;margin-bottom:13px;border:1px solid #bfdbfe;border-radius:14px;background:var(--blue2)}.supply-median span{font-size:12px;color:#1e40af;font-weight:750}.supply-median strong{font-size:21px;color:#172554;white-space:nowrap}.route-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.route-panel{min-width:0;border:1px solid var(--line);border-radius:15px;padding:12px 9px;background:#fff}.route-title{text-align:center;font-size:14px;font-weight:850;line-height:1.2}.route-total{text-align:center;color:#1e40af;font-size:17px;font-weight:850;margin:3px 0 8px}.route-gap{text-align:center;min-height:31px;font-size:10px;line-height:1.2;color:var(--muted)}.route-gap b{color:#1e3a8a}.route-stack{height:245px;width:min(100%,145px);margin:7px auto 10px;display:flex;flex-direction:column-reverse;border-radius:9px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(15,23,42,.1)}.route-segment{display:grid;place-items:center;padding:2px;color:#fff;font-size:12px;font-weight:850;text-shadow:0 1px 2px rgba(15,23,42,.5);border-top:1px solid rgba(255,255,255,.75)}.route-segment.vat{background:#38a3e8}.route-segment.stock{background:#fbbf24;color:#172554;text-shadow:none}.route-segment.tax{background:#8b5cc7}.route-segment.freight,.route-segment.pipeline{background:#ef5b5b}.route-segment.product{background:#2fb98c}.route-segment.distribution{background:#347dd8}.route-segment.estimate{background:repeating-linear-gradient(135deg,#2fb98c 0 7px,#59cba7 7px 12px)}.route-segment.pipeline,.route-segment.stock{min-height:25px}.route-key{display:grid;gap:5px;font-size:10px}.route-key div{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:5px;align-items:center}.route-key i{width:10px;height:10px;border-radius:50%;background:var(--swatch)}.route-key span{min-width:0;line-height:1.15}.route-key b{white-space:nowrap}.supply-formula,.supply-warning{margin-top:11px;padding:10px 11px;border-radius:12px;font-size:11px;line-height:1.4}.supply-formula{background:#eff6ff;color:#1e3a8a}.supply-warning{background:#fff7ed;border:1px solid #fdba74;color:#9a3412;font-weight:700}.route-descriptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.route-description{padding:10px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff;color:#1e3a8a;font-size:11px;line-height:1.35}.supply-context{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin-top:10px;border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--line)}.context-item{min-width:0;padding:10px 8px;background:#fff;font-size:10px;line-height:1.3;color:#1e3a8a}.context-item b{display:block;color:#172554;margin-bottom:2px}.context-old{color:var(--amber);font-weight:800}.supply-source{font-size:10px;color:var(--muted);line-height:1.4;margin-top:9px}
     .note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:10px}.search-row{display:flex;gap:8px}.search-row input{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px 13px;outline:none}.search-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue2)}
     .results{margin-top:8px;border:1px solid var(--line);border-radius:13px;overflow:hidden;display:none}.station{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:#fff;padding:11px 12px}.station:last-child{border-bottom:0}.station b{display:block}.station span{display:block;color:var(--muted);font-size:12px;margin-top:2px}.station:hover,.station:focus{background:var(--blue2)}
     .history-title{margin-top:14px;font-weight:800}.history-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.history-close{border:1px solid var(--line);background:#fff;border-radius:50%;width:30px;height:30px;line-height:1;cursor:pointer;font-size:20px;color:var(--muted)}.history-close:hover,.history-close:focus{color:var(--ink);background:var(--blue2)}.history-list{margin-top:8px}.history-row{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.history-row span{min-width:0;overflow-wrap:anywhere}.history-row b{margin-left:auto;white-space:nowrap;font-size:15px}
@@ -28,7 +29,7 @@
     .trend-title-value{display:block;margin-top:4px;font-size:14px;font-weight:800}
     .freshness-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.freshness-table{width:100%;min-width:470px;border-collapse:collapse;font-size:13px}.freshness-table th,.freshness-table td{padding:9px 7px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.freshness-table th:first-child,.freshness-table td:first-child{text-align:left}.freshness-table th{color:var(--muted);font-size:12px}.freshness-table tbody tr:last-child td{border-bottom:0}.freshness-table td:not(:first-child){font-weight:800}
     .error{color:#9d2626;background:#fff0f0;border-color:#ffd1d1}.skeleton{animation:pulse 1.2s infinite alternate;color:transparent!important;background:#edf0f5;border-radius:7px}@keyframes pulse{to{opacity:.5}}
-    @media(max-width:480px){.header{align-items:flex-start;flex-wrap:wrap}.header-copy{flex:1}.header-actions{width:100%;justify-content:flex-end}.search-row input{font-size:16px}.half{grid-column:1/-1}}
+    @media(max-width:480px){.header{align-items:flex-start;flex-wrap:wrap}.header-copy{flex:1}.header-actions{width:100%;justify-content:flex-end}.search-row input{font-size:16px}.half{grid-column:1/-1}.supply-heading{display:block}.supply-date{margin-top:-8px;margin-bottom:8px}.supply-median{display:block}.supply-median strong{display:block;margin-top:3px}.route-panel{padding:10px 6px}.route-stack{height:220px;width:min(100%,120px)}.route-segment{font-size:10px}.route-key div{grid-template-columns:8px minmax(0,1fr) auto;gap:3px}.route-key i{width:8px;height:8px}.route-descriptions{grid-template-columns:1fr}.supply-context{grid-template-columns:1fr}.context-item{font-size:11px}}
     @media(min-width:650px){.page{padding-top:28px}.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wide{grid-column:1/-1}.half{grid-column:span 2}}
   </style>
 </head>
@@ -66,6 +67,65 @@
       <h2>Couverture</h2>
       <div id="coverage" class="value skeleton">0</div><div class="unit">jours enregistrés</div>
       <div id="coverageNote" class="note"></div>
+    </article>
+
+    <article class="card wide supply-card">
+      <div class="supply-heading"><h2>Comparaison des voies d’approvisionnement</h2><div class="supply-date">Référence : 21.09.2026</div></div>
+      <div class="supply-median"><span>Prix médian suisse Essence 95 observé aux stations</span><strong id="supplyMedian">2.130 CHF/L</strong></div>
+      <div class="route-grid">
+        <section class="route-panel" aria-label="Scénario d’importation ARA par le Rhin">
+          <div class="route-title">Importation ARA–Rhin</div>
+          <div class="route-total">≈ 1.850 CHF/L</div>
+          <div class="route-gap">Écart non expliqué par le modèle : <b id="araGap">0.280 CHF/L</b></div>
+          <div class="route-stack" role="img" aria-label="Prix ARA 0.788, fret rhénan 0.151, taxe essence 0.7682, Carbura Avenergy 0.00415 et TVA 0.139 franc par litre">
+            <div class="route-segment product" style="flex:0.788">0.788</div>
+            <div class="route-segment freight" style="flex:0.151">0.151</div>
+            <div class="route-segment tax" style="flex:0.7682">0.7682</div>
+            <div class="route-segment stock" style="flex:0.00415">0.00415</div>
+            <div class="route-segment vat" style="flex:0.139">0.139</div>
+          </div>
+          <div class="route-key">
+            <div style="--swatch:#2fb98c"><i></i><span>Produit ARA</span><b>0.788</b></div>
+            <div style="--swatch:#ef5b5b"><i></i><span>Fret rhénan</span><b>0.151</b></div>
+            <div style="--swatch:#8b5cc7"><i></i><span>Taxe essence</span><b>0.7682</b></div>
+            <div style="--swatch:#fbbf24"><i></i><span>Carbura/Avenergy</span><b>0.00415</b></div>
+            <div style="--swatch:#38a3e8"><i></i><span>TVA 8.1 %</span><b>0.139</b></div>
+          </div>
+        </section>
+        <section class="route-panel" aria-label="Scénario d’approvisionnement par Cressier">
+          <div class="route-title">Voie Cressier</div>
+          <div class="route-total">≈ 1.730 CHF/L</div>
+          <div class="route-gap">Écart non expliqué par le modèle : <b id="cressierGap">0.400 CHF/L</b></div>
+          <div class="route-stack" role="img" aria-label="Brut et raffinage estimés 0.770, pipeline 0.020, distribution 0.038, taxe essence 0.7682, Carbura Avenergy 0.00415 et TVA 0.130 franc par litre">
+            <div class="route-segment estimate" style="flex:0.770">0.770</div>
+            <div class="route-segment pipeline" style="flex:0.020">0.020</div>
+            <div class="route-segment distribution" style="flex:0.038">0.038</div>
+            <div class="route-segment tax" style="flex:0.7682">0.7682</div>
+            <div class="route-segment stock" style="flex:0.00415">0.00415</div>
+            <div class="route-segment vat" style="flex:0.130">0.130</div>
+          </div>
+          <div class="route-key">
+            <div style="--swatch:#2fb98c"><i></i><span>Brut + raffinage estimé</span><b>0.770</b></div>
+            <div style="--swatch:#ef5b5b"><i></i><span>Pipeline</span><b>0.020</b></div>
+            <div style="--swatch:#347dd8"><i></i><span>Distribution</span><b>0.038</b></div>
+            <div style="--swatch:#8b5cc7"><i></i><span>Taxe essence</span><b>0.7682</b></div>
+            <div style="--swatch:#fbbf24"><i></i><span>Carbura/Avenergy</span><b>0.00415</b></div>
+            <div style="--swatch:#38a3e8"><i></i><span>TVA 8.1 %</span><b>0.130</b></div>
+          </div>
+        </section>
+      </div>
+      <div class="supply-formula"><b>Calcul :</b> produit ou brut raffiné + transport/logistique + taxe essence + contribution, puis TVA de 8.1 % sur ce sous-total.</div>
+      <div class="route-descriptions">
+        <div class="route-description"><b>ARA–Rhin :</b> essence raffinée du marché Amsterdam–Rotterdam–Anvers, acheminée par barge sur le Rhin jusqu’à Bâle.</div>
+        <div class="route-description"><b>Cressier :</b> pétrole brut acheminé jusqu’à Fos-sur-Mer, puis par oléoduc jusqu’à Cressier pour raffinage; distribution par rail et camion.</div>
+      </div>
+      <div class="supply-warning">Scénarios indicatifs : coûts réels, contrats, répartition régionale et marges commerciales non publiés. L’écart avec le prix médian ne représente pas automatiquement une marge.</div>
+      <div class="supply-context">
+        <div class="context-item"><b>Cressier</b>Arrêt signalé en septembre 2026 · scénario économique théorique</div>
+        <div class="context-item"><b>Rhin à Kaub</b>15 cm · basses eaux · niveau contextuel, non converti directement en CHF/L</div>
+        <div class="context-item"><b>Fret observé</b>≈ 215 EUR/t au 18.09.2026<br><span class="context-old">Observation antérieure conservée</span></div>
+      </div>
+      <div class="supply-source">Unités : CHF/L pour les barres; EUR/t pour le fret; cm pour le niveau de Kaub. Le niveau d’eau influence la capacité des barges, mais ne permet pas à lui seul de calculer un coût par litre. Les composantes ARA et Cressier sont des estimations de travail datées, pas des prix contractuels publiés.</div>
     </article>
 
     <article class="card wide">
@@ -137,6 +197,14 @@
     return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Pourcentage quotidien des hausses et baisses"><line x1="${left}" y1="${top}" x2="${left}" y2="${h-bottom}" stroke="#64748b" stroke-width="1.5"/><line x1="${left}" y1="${h-bottom}" x2="${w-right}" y2="${h-bottom}" stroke="#64748b" stroke-width="1.5"/><line x1="${left}" y1="${y(50)}" x2="${w-right}" y2="${y(50)}" stroke="#cbd5e1" stroke-dasharray="4 4"/><polyline points="${upLine}" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${downLine}" fill="none" stroke="#059669" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}<text x="${left-4}" y="${top+4}" text-anchor="end">100%</text><text x="${left-4}" y="${y(50)+4}" text-anchor="end">50%</text><text x="${left-4}" y="${h-bottom+4}" text-anchor="end">0%</text><text x="${left}" y="${h-7}">${day(points[0].date)}</text><text x="${w-right}" y="${h-7}" text-anchor="end">${day(points.at(-1).date)}</text></svg><div class="change-legend"><span class="legend-up">Hausses</span><span class="legend-down">Baisses</span></div>`;
   }
 
+  function renderSupplyComparison(rows){
+    const reference=rows.find(row=>row.snapshot_date==='2026-09-21');
+    const median=Number(reference?.median_price??2.13);
+    $('supplyMedian').textContent=`${money(median)} CHF/L`;
+    $('araGap').textContent=`${money(Math.max(0,median-1.85035))} CHF/L`;
+    $('cressierGap').textContent=`${money(Math.max(0,median-1.73035))} CHF/L`;
+  }
+
   function render(data){
     state.data=data;const rows=data.daily||[],latest=rows.at(-1),coverage=data.coverage||{};
     $('status').className='status';
@@ -148,6 +216,7 @@
     if(data.changes){const c=data.changes;$('changes').className='';$('changes').innerHTML=`<div class="change-grid"><div class="change up"><strong>↑ ${c.increases||0}</strong><span>hausses</span></div><div class="change down"><strong>↓ ${c.decreases||0}</strong><span>baisses</span></div><div class="change same"><strong>${c.unchanged||0}</strong><span>stables</span></div></div><div class="note">${Number(c.matched_stations||0).toLocaleString('fr-CH')} stations comparées · ${c.new_stations||0} nouvelles · ${c.missing_stations||0} absentes</div>`}
     else{$('changes').className='chart-empty';$('changes').textContent='Une deuxième journée est nécessaire pour calculer les changements.'}
     $('changeTrend').innerHTML=changePercentageChart(rows);enableChartTooltip($('changeTrend'));
+    renderSupplyComparison(rows);
     if(data.canton_data_available){renderCantons()}
     else{$('cantons').className='canton-placeholder';$('cantons').textContent='Les cantons ne sont pas encore attribués aux stations. Cette section sera activée après l’ajout de la correspondance géographique.'}
     const summary=data.special_summary||[],specials=data.special_stations||[];
